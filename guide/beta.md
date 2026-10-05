@@ -1,3 +1,0 @@
-# Alpha
-
-Alpha test page.
