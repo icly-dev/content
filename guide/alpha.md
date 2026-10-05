@@ -1,3 +1,3 @@
-# Alpha
+# Beta
 
-Alpha test page.
+Beta test page.
