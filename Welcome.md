@@ -8,6 +8,7 @@ This site is built from markdown files in a git repo, rendered by a small Svelte
 
 The haipa documentation currently covers the engine:
 
+- [Overview](haipa/Engine/Overview) for the input-to-decision flow,
 - [Glossary](haipa/Engine/Glossary) for shared vocabulary,
 - [Beam search](haipa/Engine/Beam Search),
 - [Transposition table](haipa/Engine/Transposition Table),
