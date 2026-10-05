@@ -6,18 +6,15 @@ title: Transposition table
 
 ## Glossary
 
+Shared engine vocabulary (board, roof, placement, depth, horizon, hold, status) is defined in the [Glossary](Glossary). This page only defines what is specific to caching:
+
 | Term | Meaning |
 |------|---------|
-| Board | The playfield: a grid of occupied and empty cells. Two boards are the same if every cell matches. In the ruleset this engine ships with, the grid is 10 cells wide. |
-| Roof | The height of the tallest stack. Rows above the roof are always empty. |
-| Placement | Dropping the current piece (or the held piece) at a specific position and orientation, including the line clears it causes. |
-| Evaluation | A number (plus some auxiliary scores) the AI assigns to a board, measuring how good that board is. |
+| Transposition | Two different move orders that reach the same board. The table's name comes from chess programming, where this idea originated. |
 | Hash | A 64-bit fingerprint of a board. Two identical boards always get the same hash; two different boards get the same hash only by rare accident. |
-| Depth | How many pieces into the future a position is. Depth 0 is the current move. |
-| Horizon | The furthest depth the search looks ahead. The *real* horizon uses the actually queued pieces; the *fake* horizon extends beyond it with randomly sampled pieces. |
-| Hold | The one-piece stash a player can swap the current piece into. |
 | Hit / miss | A lookup finds the board's hash in the table (hit) or does not (miss). Only a miss triggers a new evaluation. |
-| Beam search | The search strategy: at each depth it keeps only the most promising placements and expands those, discarding the rest. |
+| Bucket | A fixed group of table slots that a hash maps to. This table uses buckets of two slots. |
+| Eviction | Discarding a stored evaluation to make room for a new one. Safe, since an evaluation can always be recomputed. |
 
 ## Overview
 
