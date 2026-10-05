@@ -8,4 +8,4 @@ Welcome. This site is built from markdown files in a git repo, rendered by a sma
 - The directory tree on the left is generated from the repo layout.
 - Sign in with GitHub or Discord to comment on any page.
 
-Head over to [the docs](/docs/getting-started) to see rendered markdown with syntax highlighting.
+Head over to [the docs](/docs/guide/getting-started) to see rendered markdown with syntax highlighting.
