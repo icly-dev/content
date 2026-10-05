@@ -32,6 +32,7 @@ Readers cannot see the code, so pages must stand alone without it.
 ## Aids: pseudocode and diagrams
 
 - Use Python-style pseudocode for algorithms and plain `text` diagrams for layouts and flows. The site renderer does not support mermaid; it only does syntax highlighting (shiki), so mermaid blocks render as raw code.
+- Link destinations that contain spaces must be wrapped in angle brackets: `[text](<Some Page>)`. A bare `](Some Page)` is not a link in CommonMark and renders as literal text.
 - Mark invented placeholder names in pseudocode as placeholders (`apply_context` here is just a placeholder ... it is not a function the reader could call), and point to the section that explains the real behavior.
 - Keep pseudocode aligned with the prose simplifications: if the text omits an edge case, the pseudocode should omit it too and the omission should be stated.
 

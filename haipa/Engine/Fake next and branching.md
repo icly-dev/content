@@ -33,7 +33,7 @@ The fake horizon length and the branch count are host-side knobs: the profiler e
 
 Branches are independent only where they must be:
 
-- The beam limit schedule is computed once for the combined horizon, known placements plus the fake tail, and every branch runs under the same caps. See [Beam search](Beam Search) for the schedule itself.
+- The beam limit schedule is computed once for the combined horizon, known placements plus the fake tail, and every branch runs under the same caps. See [Beam search](<Beam Search>) for the schedule itself.
 - The search runs once through the prefix covered by known pieces, one placement deeper when hold is enabled and a held piece is usable, since the swap is also a placement of a known piece. The frontier at that point is snapshotted, and every branch continues from it.
 - The branches place the last known piece with different expectations about the sampled tail, which can already change the paths the search prefers; from the following layer on, the placed pieces themselves differ.
 - When nothing at all is known, no prefix is shared and every branch runs its own full search from the root.
@@ -47,4 +47,4 @@ The most-voted first move wins. Ties go to the move with the better status, then
 
 ## Interaction with the caches
 
-The transposition table keeps a separate set of tables for the fake region, cleared on every move, since the sampled tail changes each decision. See [Transposition table](Transposition Table).
+The transposition table keeps a separate set of tables for the fake region, cleared on every move, since the sampled tail changes each decision. See [Transposition table](<Transposition Table>).

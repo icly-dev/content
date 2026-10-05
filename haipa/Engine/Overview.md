@@ -13,7 +13,7 @@ This page walks through one decision of the engine: what goes in, what happens i
 | Runner | The host program playing the game. It owns the game state and asks the engine for a decision. |
 | Decision | One engine call: look at the current state, choose what to do with the active piece. |
 | Movement path | The sequence of inputs that moves the active piece from its current position to the chosen landing. |
-| Known preview | The piece queue the runner guarantees; see [Fake next and branching](Fake next and branching). |
+| Known preview | The piece queue the runner guarantees; see [Fake next and branching](<Fake next and branching>). |
 
 ## One decision, end to end
 
@@ -34,9 +34,9 @@ Preparation then sets up the search:
 
 - the playfield is loaded into the engine's internal board representation and the piece position is translated,
 - the match state (combo, back-to-back, incoming attack) is loaded into the running status,
-- caches are reconciled: if the AI's parameters changed since the last call, everything cached is dropped; otherwise the transposition tables carry over as described in [Transposition table](Transposition Table).
+- caches are reconciled: if the AI's parameters changed since the last call, everything cached is dropped; otherwise the transposition tables carry over as described in [Transposition table](<Transposition Table>).
 
-The search itself is the [beam search](Beam Search): it expands placements depth by depth under a pre-computed beam limit schedule, scores candidates through the cached board evaluations, halts early when the whole beam agrees on the first placement, and branches over [sampled futures](Fake next and branching) when the known preview runs out.
+The search itself is the [beam search](<Beam Search>): it expands placements depth by depth under a pre-computed beam limit schedule, scores candidates through the cached board evaluations, halts early when the whole beam agrees on the first placement, and branches over [sampled futures](<Fake next and branching>) when the known preview runs out.
 
 The decision is the best candidate the deepest completed layer produced, traced back to its first placement: where the active piece should land, or whether a hold swap should happen first.
 

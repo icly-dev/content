@@ -10,9 +10,9 @@ The haipa documentation currently covers the engine:
 
 - [Overview](haipa/Engine/Overview) for the input-to-decision flow,
 - [Glossary](haipa/Engine/Glossary) for shared vocabulary,
-- [Beam search](haipa/Engine/Beam Search),
-- [Transposition table](haipa/Engine/Transposition Table),
-- [Fake next and branching](haipa/Engine/Fake next and branching).
+- [Beam search](<haipa/Engine/Beam Search>),
+- [Transposition table](<haipa/Engine/Transposition Table>),
+- [Fake next and branching](<haipa/Engine/Fake next and branching>).
 
 ## Feedback wanted
 

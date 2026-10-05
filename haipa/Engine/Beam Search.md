@@ -49,7 +49,7 @@ def search(board, horizon, limits):
 
 Each surviving candidate remembers the *first* placement of its path (including whether it was a hold swap), so no matter how deep the search goes, the answer is always extractable as one concrete move for the current piece.
 
-Every child is scored when it is generated. Scoring itself is where the [transposition table](Transposition Table) lives: the board evaluation is cached, and the context-dependent part of the status is applied per candidate.
+Every child is scored when it is generated. Scoring itself is where the [transposition table](<Transposition Table>) lives: the board evaluation is cached, and the context-dependent part of the status is applied per candidate.
 
 ## The beam limit schedule
 
@@ -113,7 +113,7 @@ After the first layer is admitted, and again after every later layer, the search
 
 When the piece queue beyond the known preview is unknown, the horizon extends into fake pieces, and a search over one guessed future cannot be trusted alone: the search branches over several sampled futures and lets them vote on the first move. The beam limit schedule is computed once for the combined horizon, known placements plus the fake tail, and every branch runs under the same caps, continuing from a shared frontier through the placements covered by known pieces.
 
-That mechanism has its own page: [Fake next and branching](Fake next and branching).
+That mechanism has its own page: [Fake next and branching](<Fake next and branching>).
 
 ## What pre-computing buys and costs
 
