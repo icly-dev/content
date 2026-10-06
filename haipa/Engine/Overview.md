@@ -4,7 +4,7 @@ title: Overview
 
 # Overview
 
-This page walks through one decision of the engine: what goes in, what happens inside, and what comes out. The individual stages have their own pages, linked along the way.
+This page walks through one decision of the engine: what goes in, what happens inside, and what comes out. The individual stages have their own pages, linked along the way. The judgment the engine calls for lives in the AI, which has its own page: [AI interface](<../AI/AI interface>).
 
 ## Glossary
 
