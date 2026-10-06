@@ -36,9 +36,9 @@ Preparation then sets up the search:
 - the match state (combo, back-to-back, incoming attack) is loaded into the running status,
 - caches are reconciled: if the AI's parameters changed since the last call, everything cached is dropped; otherwise the transposition tables carry over as described in [Transposition table](<Transposition Table>).
 
-The search itself is the [beam search](<Beam Search>): it expands placements depth by depth under a pre-computed beam limit schedule, scores candidates through the cached board evaluations, halts early when the whole beam agrees on the first placement, and branches over [sampled futures](<Fake next and branching>) when the known preview runs out.
+The search itself is the [beam search](<Beam Search>): it expands placements depth by depth under a pre-computed beam limit schedule, scores candidates through the cached board evaluations, halts early when the whole beam agrees on the first placement, and branches over [sampled futures](<Fake next and branching>) when the known preview runs out. The raw material comes from the [landing search](<../Search/Landings>), which reports, for every candidate, the spots its piece can reach and which of them are spins.
 
-The decision is the best candidate the deepest completed layer produced, traced back to its first placement: where the active piece should land, or whether a hold swap should happen first.
+The decision is the best candidate the deepest completed layer produced, traced back to its first placement: where the active piece should land, or whether a hold swap should happen first. The [path search](<../Search/Movement paths>) then turns that placement into the command string.
 
 ## What comes out
 

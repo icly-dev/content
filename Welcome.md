@@ -6,13 +6,15 @@ title: Welcome
 
 This site is built from markdown files in a git repo, rendered by a small SvelteKit app. Pages live under `content/` and are mirrored to URLs, the directory tree on the left is generated from the repo layout, and every page accepts comments: sign in with GitHub or Discord to leave one.
 
-The haipa documentation currently covers the engine:
+The haipa documentation currently covers the engine and the movement layers beneath it:
 
 - [Overview](haipa/Engine/Overview) for the input-to-decision flow,
 - [Glossary](haipa/Engine/Glossary) for shared vocabulary,
 - [Beam search](<haipa/Engine/Beam Search>),
 - [Transposition table](<haipa/Engine/Transposition Table>),
-- [Fake next and branching](<haipa/Engine/Fake next and branching>).
+- [Fake next and branching](<haipa/Engine/Fake next and branching>),
+- [Landings](<haipa/Search/Landings>) for how the engine finds every placement a piece can make,
+- [Movement paths](<haipa/Search/Movement paths>) for how the chosen placement becomes the inputs the runner executes.
 
 ## Feedback wanted
 

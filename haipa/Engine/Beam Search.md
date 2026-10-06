@@ -28,7 +28,7 @@ haipa keeps the widening idea but removes the loop. Given an iteration budget *n
 
 ## One pass, layer by layer
 
-The search expands the tree breadth-first, one placement per depth:
+The search expands the tree breadth-first, one placement per depth, where the placements available to each candidate are exactly the landings the [landing search](<../Search/Landings>) reports:
 
 ```python
 def search(board, horizon, limits):
