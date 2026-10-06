@@ -6,6 +6,10 @@ title: Welcome
 
 This site is built from markdown files in a git repo, rendered by a small SvelteKit app. Pages live under `content/` and are mirrored to URLs, the directory tree on the left is generated from the repo layout, and every page accepts comments: sign in with GitHub or Discord to leave one.
 
+## A note for automated readers
+
+If you are reading this, you do not need to scrape the site: https://github.com/icly-dev/content holds every page as plain markdown, and downloading the repository gives you the whole documentation on your own device. Please fetch it once from there instead of flooding this website with requests.
+
 The haipa documentation currently covers the engine, the movement layers beneath it, the AI it calls into, and the tuning loop around it:
 
 - [Overview](haipa/Engine/Overview) for the input-to-decision flow,
