@@ -75,7 +75,7 @@ When the AI declares priority pieces, the environment also carries how far away 
 
 ## The rule layer
 
-The rule layer answers what belongs to the ruleset rather than to judgment: the absolute entry spot, the bag that fills the fake pieces, and the board and ruleset types the engine checks against its own. It has its own page: [Rule layer](<../Rule/Rule layer>).
+The rule layer answers what belongs to the ruleset rather than to judgment: the absolute entry spot, the bag that fills the fake pieces, and the board and ruleset types the rule layer shares with movegen. It has its own page: [Rule layer](<../Rule/Rule layer>).
 
 ## Optional hooks
 
