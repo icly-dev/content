@@ -53,12 +53,20 @@ The search scores each child as soon as it is generated. The [transposition tabl
 
 ## The beam limit schedule
 
-The schedule is the heart of the design. Given the iteration budget *n* and the horizon, it decides how many survivors each depth may keep. Three ingredients shape it:
+The schedule is the heart of the design. Given the iteration budget *n* and the horizon, it decides how many survivors each depth may keep. Two ingredients shape it:
 
 1. **A total budget.** The first layer is capped at twice the search width, which is determined by the iteration budget. The remaining budget for deeper layers scales with the same width times the horizon. The first layer is kept outside the profile intentionally: it contains every legal placement of the current piece, about 34 in the shipped ruleset. These placements are cheap to evaluate and directly relevant because one will be played. The cap is high enough that it never binds, so no legal first move is discarded before evaluation. The Gaussian profile only distributes the much larger remaining budget across deeper layers.
 2. **A Gaussian depth profile.** The budget is not divided evenly. A Gaussian distributes it across depths, centered at a configurable fraction of the horizon and using a configurable spread. Each depth gets at least 5 percent of the peak. Depths near the center keep most survivors, while both ends get less. Early depths need less budget because they are cheap to revisit and their board evaluations remain in the transposition table. The final depths also get less because there is little opportunity to use their results.
 
 The AI's configuration sets the two profile controls, peak position and spread. Changing the configuration changes where the search concentrates its work.
+
+The animations below move the peak across the full horizon. They use a horizon of 7 and an iteration budget of 200. Solid bars show the candidates that exist and enter the beam; outlines show the caps. The blue bar is the fixed first-layer cap. At this budget it is higher than the roughly 34 possible first placements, so it never binds. With a narrow spread, the peak covers one or two depths. With a wider spread, survivors cover most of the horizon:
+
+![Beam limits with spread 0.5 while the peak sweeps across the horizon](../../asset/beam_limits_spread_0.5.gif)
+
+![Beam limits with spread 1.5 while the peak sweeps across the horizon](../../asset/beam_limits_spread_1.5.gif)
+
+The rates under the bars are measured averages of how many children a kept position produces at each depth. They decide what exists at the next depth, not the caps. Moving the peak moves where the deeper budget is spent, and with it the total number of candidates evaluated per decision.
 
 ## Keeping the survivors
 
