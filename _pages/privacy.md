@@ -1,5 +1,7 @@
 # Privacy
 
+*Last updated 6 October 2026.*
+
 icly.dev is a personal site for project notes and bot development. This page explains what data the site collects and why.
 
 ## Account data (login)
@@ -8,7 +10,11 @@ You can sign in only through Discord or GitHub OAuth. We store your provider han
 
 ## Comments
 
-When you leave a comment, we store its text, the provider handle and avatar displayed with it, and your voting history on comments. Unlike the previous version of the site, we do not record IP addresses or browser user agents, and we do not run automated spam scanning.
+When you leave a comment, we store its text, the provider handle and avatar displayed with it, and your voting history on comments. Comments are public: anyone visiting the page can read them. Unlike the previous version of the site, we do not record IP addresses or browser user agents, and we do not run automated spam scanning.
+
+## Docs feedback
+
+You can highlight text in the docs and submit feedback. If you sign in with GitHub, your browser opens a pre-filled public issue on GitHub under your own GitHub account; the site itself stores nothing. If you sign in with Discord, the site files the feedback for you: the text you wrote is published as a public issue in the `icly-dev/content` repository on GitHub, posted under the site owner's GitHub account with a credit to your Discord handle, and a copy is added as a public comment on the page so you can follow up. Replies to that comment are handled like any other comment. The site also keeps a private record of which replies you have dismissed. Once feedback is on GitHub, GitHub's privacy policy applies to it.
 
 ## Anonymous visits
 
@@ -20,7 +26,7 @@ A session cookie lets the server recognize you between requests while you are si
 
 ## Third parties
 
-Cloudflare serves the site, handles connections, and may keep edge logs, as other CDNs do. Discord and GitHub receive only the information their OAuth flows require. We do not run ads or third-party analytics scripts.
+Cloudflare serves the site, handles connections, and may keep edge logs, as other CDNs do. Discord and GitHub receive only the information their OAuth flows require. If you submit docs feedback while signed in with Discord, its text and your Discord handle are published on GitHub as described above. We do not run ads or third-party analytics scripts.
 
 ## Retention and deletion
 

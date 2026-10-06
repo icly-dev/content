@@ -1,5 +1,7 @@
 # Terms
 
+*Last updated 6 October 2026.*
+
 ## Acceptance
 
 By using icly.dev you agree to these terms. If you do not agree, please do not use the site.
@@ -23,6 +25,10 @@ The site owner reserves the right to take any action needed to keep the site saf
 ## Content
 
 You retain the rights to what you post. You grant the site a non-exclusive license to store and display your posts. Removed content may remain as a `[deleted]` placeholder so conversations keep their context.
+
+## Docs feedback
+
+Feedback submitted through the docs is public and non-confidential. Depending on how you are signed in, it is published either as a GitHub issue under your own GitHub account, or as a GitHub issue posted under the site owner's account with a credit to your Discord handle, together with a public comment on the page. The same rules that apply to comments apply to feedback: do not include anything you are not comfortable publishing.
 
 ## No warranty
 
