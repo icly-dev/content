@@ -36,7 +36,7 @@ Every input adds its frame cost, and the cheapest total time wins; a state reach
 
 ## Reproducing the promised spin
 
-The scored spin grade is a promise: the game only honors it if the executed inputs end with the right rotation. So the spin is part of the movement state, re-derived after every rotation with the same corner and kick rules the [movegen sweep](<Movegen#spin-classification>) used. A route arriving with the wrong spin does not reach the goal, so the output path ends in a rotation that produces the promised spin, or there is no path.
+The scored spin grade is a promise: the game only honors it if the executed inputs end with the right rotation. So the spin is part of the movement state, re-derived after every rotation with the same corner and kick rules the [movegen grading pass](<Movegen#spin-classification>) used. A route arriving with the wrong spin does not reach the goal, so the output path ends in a rotation that produces the promised spin, or there is no path.
 
 Both layers grade spins with the same rules, so a scored grade is a reproducible grade.
 

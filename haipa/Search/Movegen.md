@@ -23,7 +23,6 @@ Shared engine vocabulary (board, roof, placement, depth, horizon, hold) is defin
 | Kick | The nudge a ruleset applies when a rotation is blocked; kicks can shift a piece sideways or upward while it rotates. |
 | Floating movement | Inputs that let the piece descend under control: soft drop, one row at a time, and sonic drop, down to the resting spot without locking. Floating is what lets a piece slide under an overhang mid-descent. |
 | Hard drop | Straight down to the resting spot, locking immediately. |
-| Bitboard | A board stored as raw bits, one per cell, so a whole row of cells is examined or moved in a single operation. |
 | Spin | A landing reached by rotating into a tight pocket rather than falling into it. The ruleset this engine ships with rewards these for one piece, the T, and grades them into a full spin and a weaker mini spin. |
 
 ## The contract
@@ -35,44 +34,32 @@ Movegen takes:
 - the movement options the runner declares (for example, whether 180-degree rotations are allowed),
 - the candidate's context: the current stack roof, and whether the placement that produced this board cleared lines.
 
-It reports every reachable landing: a position and orientation, plus an auxiliary tag. The tag is part of the search itself, not of the movement mechanics: the shipped engine grades T-spins with it (none, mini, or full); another search could carry something else. Reports arrive one at a time through a callback as the sweep finds them, not as a list: the consumer places and scores each landing immediately. Movegen runs for every candidate at every depth, so this keeps the hot path free of per-candidate allocation; a return value would mean a growable result list on every call.
+It reports every reachable landing: a position and orientation, plus an auxiliary tag. The tag is part of the search itself, not of the movement mechanics: the shipped engine grades T-spins with it (none, mini, or full); another search could carry something else. Reports arrive one at a time through a callback as movegen finds them, not as a list: the consumer places and scores each landing immediately. Movegen runs for every candidate at every depth, so this keeps the hot path free of per-candidate allocation; a return value would mean a growable result list on every call.
 
 It never scores anything. Where the piece can go is mechanics; whether that is good is judgment, and judgment lives in the evaluation. Movegen must be fast and exhaustive over mechanics, and stay correct no matter how the evaluation changes.
 
 ## Built on fast-reachability
 
-Movegen is a thin layer over a separate, public movement library, [fast-reachability](https://github.com/icly-dev/fast-reachability). The library owns the movement model: the bitboard representation, the reachability sweep described next, and the movement checker that answers, for any spot, whether the piece can shift or descend from there, and where a rotation with its kicks lands.
+Movegen is a thin layer over a separate, public movement library, [fast-reachability](https://github.com/icly-dev/fast-reachability). One call per piece:
 
-Spin grading and [pathgen](<Pathgen>) both ask that checker, so there is one definition of "can move".
+- in: the board, the spawn position and orientation, and the allowed options,
+- out: the positions each orientation of the piece can reach, plus a movement checker built from that same call.
 
-haipa supplies the rest: the ruleset's pieces and kick tables, the per-candidate options (the restriction below), spin grading, and the pathgen search. The movement model stays in an independent, benchmarked library; the engine's code stays about policy, not geometry.
+The results are exact: a position is reported only if the allowed inputs can reach it, and every reachable position is reported. The cells the piece cannot move down from are the landings, and movegen enumerates them and streams them out as described above.
 
-## The sweep
+The checker answers, for any spot: can the piece shift or descend from there, and where does a rotation with its kicks land. Spin grading and [pathgen](<Pathgen>) both ask that checker, so there is one definition of "can move".
 
-The sweep is fast-reachability's, and it does not walk positions one by one. For each orientation of the piece it keeps one bitboard: every cell where that orientation fits. One operation advances the whole set at once:
-
-- shift the entire set one cell left or right, minus wherever that would overlap,
-- rotate the entire set into the neighboring orientation, applying the ruleset's kick tables,
-- when floating is allowed, descend the entire set one row.
-
-Repeating this until nothing new appears yields, for every orientation, every cell the piece can occupy. The cells it cannot move down from are the landings.
-
-Two properties matter:
-
-- **Exactness.** A landing is reported only if the inputs can reach it, and every reachable landing is reported, subject to the restriction below.
-- **Early exit.** The sweep stops once every resting spot on the board is covered; on open boards that comes long before convergence.
-
-When floating is allowed, the sweep also credits inputs held while falling: positions reachable by sliding along unobstructed rows during the descent are computed in one step, which cell-by-cell expansion alone would undercount.
+haipa decides the inputs (the options, including the restriction below) and interprets the outputs (landings, spin grades). The movement model stays in an independent, benchmarked library; the engine's code stays about policy, not geometry.
 
 ## When floating is allowed
 
-By default the sweep may use every option the runner allows. One restriction is applied per candidate. When all of these hold, soft drop and sonic drop are switched off, so the piece may only shift and rotate near the top, then hard drop:
+By default every option the runner allows goes into the call. One restriction is applied per candidate: when all of these hold, soft drop and sonic drop are switched off, so the piece may only shift and rotate near the top, then hard drop:
 
 - the piece is not the spin piece,
 - the placement that produced this board cleared no lines,
 - the piece spawns entirely above the stack, the normal case (its lowest cell sits above the [roof](<../Engine/Glossary>)).
 
-The rationale is speed. Floating multiplies the reachable positions enormously, most floating placements for a non-spin piece would be discarded by the evaluation anyway, and the sweep runs for every candidate at every depth. Cutting it where it rarely matters buys a large reduction where it always runs.
+The rationale is speed. Floating multiplies the reachable positions enormously, most floating placements for a non-spin piece would be discarded by the evaluation anyway, and the call runs for every candidate at every depth. Cutting it where it rarely matters buys a large reduction where it always runs.
 
 The exceptions keep floating where it earns its keep: the spin piece always keeps it, spins are made by descending partway and rotating into a pocket, and it returns when the stack reaches the spawn area or the previous placement cleared lines.
 
@@ -83,7 +70,7 @@ Two consequences:
 
 ## Spin classification
 
-Spin detection runs over the landings of the spin piece only, as a grading pass on top of the sweep. In the ruleset this engine ships with, that piece is the T, and the tag grades each landing none, mini, or full.
+Spin detection runs over the landings of the spin piece only, as a grading pass on top of the returned positions, using the checker. In the ruleset this engine ships with, that piece is the T, and the tag grades each landing none, mini, or full.
 
 1. **Pinned.** The piece cannot move down from the landing; otherwise it has not spun.
 2. **Corners.** The four diagonal cells around the piece's center are checked against the board. Enough occupied means the piece is wedged in a way only a rotation can produce.
