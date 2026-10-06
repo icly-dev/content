@@ -16,7 +16,7 @@ The AI has two parts: judgment, which scores boards and candidates, and the rule
 
 ## The board
 
-The rule layer declares the board type, which serves as the canonical definition. The engine uses it to get the board's width and height rather than setting its own. The AI's judgment and movegen must use the same board and ruleset types, and the engine checks this at compile time.
+The rule layer declares the board type, which serves as the canonical definition. The engine uses it to get the board's width and height rather than setting its own. The AI's judgment and movegen must use the same board and ruleset types; a mismatch fails to compile when the engine passes its board to either.
 
 In the ruleset this engine ships with, the board is 10 cells wide and 24 rows tall.
 
