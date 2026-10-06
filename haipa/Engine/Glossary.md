@@ -4,16 +4,16 @@ title: Glossary
 
 # Glossary
 
-Terms used across the engine documentation. Feature pages link here for shared vocabulary and define only what is specific to them.
+This glossary defines terms used across the engine docs. Feature pages link here and define only the terms specific to their topic.
 
 | Term | Meaning |
 |------|---------|
-| Board | The playfield: a grid of occupied and empty cells. Two boards are the same if every cell matches. In the ruleset this engine ships with, the grid is 10 cells wide. |
-| Roof | The height of the tallest stack. Rows above the roof are always empty. |
-| Placement | Dropping the current piece (or the held piece) at a specific position and orientation, including the line clears it causes. |
-| Evaluation | A number the AI assigns to a board, measuring how good that board is. |
+| Board | The playfield, a grid of occupied and empty cells. Two boards are identical when every cell matches. In the shipped ruleset, the grid is 10 cells wide. |
+| Roof | The height of the tallest stack. Every row above it is empty. |
+| Placement | Dropping the current piece, or the held piece, at a specific position and orientation, along with any resulting line clears. |
+| Evaluation | A number the AI assigns to a board to measure how good it is. |
 | Depth | How many pieces into the future a position is. Depth 0 is the current move. |
-| Horizon | The furthest depth the search looks ahead. The *real* horizon uses the actually queued pieces; the *fake* horizon extends beyond it with randomly sampled pieces. |
+| Horizon | How far ahead the search looks. The *real* horizon uses pieces already in the queue; the *fake* horizon extends beyond it with randomly sampled pieces. |
 | Hold | The one-piece stash a player can swap the current piece into. |
-| Status | The AI's running assessment of a search path: the board's evaluation plus the context gathered along the way, such as line clears, combo, and back-to-back, carried together as one comparable value. |
-| Search budget | The size of one search decision: a count that sizes the beam rather than a clock, which keeps searches reproducible. |
+| Status | The AI's running assessment of a search path. It combines the board evaluation with context gathered along the way, such as line clears, combo, and back-to-back, into one value for comparison. |
+| Search budget | A count that sets the beam size for one search decision. It is not a time limit, which keeps searches reproducible. |

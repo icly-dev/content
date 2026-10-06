@@ -16,20 +16,20 @@ Shared engine vocabulary (board, roof, placement, evaluation, depth, horizon, ho
 | Search width | The beam size the iteration budget translates into; the first layer's cap and the deeper layers' budget scale from it. |
 | Frontier | The set of survivors at the depth currently being expanded. |
 | Candidate | One placement along one path: the board it produces, its status, and a link back to the first placement of its path. |
-| Iterative widening | Growing the beam gradually: start narrow, keep widening as long as budget remains, and stop when the budget runs out. The upstream engine haipa is based on works this way. |
+| Iterative widening | Gradually growing the beam, starting narrow and widening while budget remains. The upstream engine that haipa is based on uses this approach. |
 | Branching factor | How many children an average kept position produces, counted as the placements scored from it. |
 | Learned branching estimate | A running average of the observed branching factor at each depth, carried between moves and used to balance the schedule. |
 | Tie-break | The rule that decides between equally good candidates. Here it is generation order, which makes the whole search deterministic. |
 
 ## Overview
 
-The engine is based on [tetris_ai_runner](https://github.com/TetrisAI/tetris_ai_runner), and the search is the part that changed most. The upstream engine is an anytime search driven by the clock: it starts with a narrow beam and *iteratively widens*, expanding a little more on every pass until the time limit expires. The result is a beam shape that comes out of however many widening steps fit in the budget, and a search whose outcome can vary with machine load.
+haipa is based on [tetris_ai_runner](https://github.com/TetrisAI/tetris_ai_runner), but its search is the part that changed most. The upstream engine uses an anytime search controlled by a clock. It starts with a narrow beam, then *iteratively widens* it on each pass until the time limit expires. The final beam shape depends on how many widening steps fit in the available time, so machine load can affect the result.
 
-haipa keeps the widening idea but removes the loop. Given an iteration budget *n*, it **pre-computes the entire beam limit schedule** for every depth, then runs a single breadth-first pass under those limits. The pre-computed schedule imitates the shape that iterative widening settles on, while the search itself becomes one deterministic sweep with no time measurement and no re-expansion of already-explored positions.
+haipa keeps the widening idea but removes the loop. Given an iteration budget *n*, it **precomputes the full beam limit schedule** for every depth, then runs one breadth-first pass under those limits. The schedule approximates the shape produced by iterative widening, while the search itself becomes one deterministic sweep. It does not measure time or re-expand positions it has already explored.
 
 ## One pass, layer by layer
 
-The search expands the tree breadth-first, one placement per depth, where the placements available to each candidate are exactly the landings the [movegen](<../Search/Movegen>) reports:
+The search explores the tree breadth-first, adding one placement per depth. For each candidate, it uses exactly the landings reported by [movegen](<../Search/Movegen>):
 
 ```python
 def search(board, horizon, limits):
@@ -48,37 +48,37 @@ def search(board, horizon, limits):
     return best.first_move
 ```
 
-The branch split over sampled futures sits outside this loop: it runs once per branch, continuing from a shared frontier (see [Fake next and branching](<Fake next and branching>)).
+Sampled-future branching happens outside this loop. The search runs once for each branch, continuing from a shared frontier (see [Fake next and branching](<Fake next and branching>)).
 
-Each surviving candidate remembers the *first* placement of its path (including whether it was a hold swap), so no matter how deep the search goes, the answer is always one concrete move for the current piece.
+Each surviving candidate stores the *first* placement in its path, including whether it used a hold swap. No matter how deep the search goes, it can therefore return one concrete move for the current piece.
 
-Every child is scored when it is generated. Scoring itself is where the [transposition table](<Transposition Table>) lives: the board evaluation is cached, and the context-dependent part of the status is applied per candidate.
+The search scores each child as soon as it is generated. The [transposition table](<Transposition Table>) caches the board evaluation, while the context-dependent part of the status is applied separately to each candidate.
 
 ## The beam limit schedule
 
 The schedule is the heart of the design. Given the iteration budget *n* and the horizon, it decides how many survivors each depth may keep. Three ingredients shape it:
 
-1. **A total budget.** The first layer of placements is capped at twice the search width, a size that follows from the iteration budget; the remaining budget across the deeper layers scales with the same width times the horizon. The first layer sits outside the profile on purpose. It holds every legal placement of the current piece, about 34 in the shipped ruleset, all of them cheap to evaluate and all of them directly relevant, since one of them is the move the engine will actually play. The cap is set high enough to never bind, so no real move is discarded before it has been judged, and the Gaussian profile only decides how the much larger deeper layers share the rest of the budget.
-2. **A Gaussian depth profile.** The budget is not spread evenly. Its distribution across depths follows a Gaussian centered at a configurable fraction of the horizon, with a configurable spread and a floor of 5 percent of the dome's peak: depths near the center of the horizon keep most of the survivors, and both ends get little on purpose. Early depths matter little because they are cheap to redo, their boards' evaluations already sitting in the transposition table, and the last depths matter little because there is no time left to use what they found.
-3. **Branching-factor balancing.** The dome shapes the *evaluation work* of each depth, not the survivor count directly. The engine keeps a learned branching estimate, a running average of how many children each depth actually produced in past searches, and divides each depth's share by it: a depth that branches harder gets a smaller survivor cap, so that the number of scored children per depth follows the dome. Survivor counts therefore move opposite to branching, and the cap sequence is on purpose not smooth even when the dome is. The estimates reset when a new game starts.
+1. **A total budget.** The first layer is capped at twice the search width, which is determined by the iteration budget. The remaining budget for deeper layers scales with the same width times the horizon. The first layer is kept outside the profile intentionally: it contains every legal placement of the current piece, about 34 in the shipped ruleset. These placements are cheap to evaluate and directly relevant because one will be played. The cap is high enough that it never binds, so no legal first move is discarded before evaluation. The Gaussian profile only distributes the much larger remaining budget across deeper layers.
+2. **A Gaussian depth profile.** The budget is not divided evenly. A Gaussian distributes it across depths, centered at a configurable fraction of the horizon and using a configurable spread. Each depth gets at least 5 percent of the peak. Depths near the center keep most survivors, while both ends get less. Early depths need less budget because they are cheap to revisit and their board evaluations remain in the transposition table. The final depths also get less because there is little opportunity to use their results.
+3. **Branching-factor balancing.** The Gaussian profile shapes the *evaluation work* at each depth, not the number of survivors directly. The engine tracks a learned branching estimate, a running average of how many children each depth produced in previous searches. It divides each depth's budget share by that estimate. A depth with more branching gets a smaller survivor cap, so the number of children scored at each depth follows the profile. Survivor counts therefore move in the opposite direction from branching, and the caps are intentionally uneven even when the profile is smooth. The estimates reset when a new game starts.
 
-The animations below sweep the peak across the full horizon in the settled state (horizon 7, iteration budget 200, and the per-depth branching estimates settled at the values measured from the engine: 68.0, 51.0, 68.7, 54.2, 33.1, 49.5, and 27.0 children per kept node at depths 1 through 6). Solid is what actually exists and enters the beam, the outline is the cap, and the blue bar is the fixed first-layer cap, which at this budget exceeds the roughly 34 possible first placements and never binds. With a narrow spread the bump is one or two depths wide; with a wider spread the survivors cover most of the horizon, while survivor counts still move opposite to branching in both:
+The animations below move the peak across the full horizon after the branching estimates have settled. They use a horizon of 7, an iteration budget of 200, and the measured per-depth averages of 68.0, 51.0, 68.7, 54.2, 33.1, 49.5, and 27.0 children per kept node at depths 1 through 6. Solid bars show what actually exists and enters the beam; outlines show the caps. The blue bar is the fixed first-layer cap. At this budget it is higher than the roughly 34 possible first placements, so it never binds. With a narrow spread, the peak covers one or two depths. With a wider spread, survivors cover most of the horizon. In both cases, survivor counts move opposite to branching:
 
 ![Beam limits with spread 0.5 while the peak sweeps across the horizon](../../asset/beam_limits_spread_0.5.gif)
 
 ![Beam limits with spread 1.5 while the peak sweeps across the horizon](../../asset/beam_limits_spread_1.5.gif)
 
-Dividing by branching has a property worth knowing: the total number of candidates evaluated per decision barely changes with the peak and the spread (within 0.1 percent across the full sweep on the measured profile above).
+Balancing by branching keeps the total number of candidates evaluated per decision almost unchanged as the peak and spread move. Across the full sweep above, the difference is within 0.1 percent.
 
-The branching estimates start at 1, so the first deep searches of every game run the pure dome shape before anything has been learned, and the estimates settle within a few searches (each search updates every depth it actually expands). During that warmup the equal-work property does not hold, since there is nothing to divide by; the animation below shows the same sweep before any estimate has been learned:
+Branching estimates start at 1, so the first deep searches in each game follow the unadjusted profile. The estimates settle within a few searches, as each search updates every depth it expands. During this warmup, the work is not yet balanced because there is no learned branching rate to divide by. The animation below shows the same sweep before the estimates have been learned:
 
 ![Beam limits during warmup, spread 1.5, before the branching estimates have been learned](../../asset/beam_limits_warmup_spread_1.5.gif)
 
-The two profile knobs (the peak position and the spread) come from the AI's configuration, so changing the AI's configuration also changes where the search concentrates its work.
+The AI's configuration sets the two profile controls, peak position and spread. Changing the configuration changes where the search concentrates its work.
 
 ## Keeping the survivors
 
-Children compete for the frontier slots in a priority queue that never grows past the beam limit:
+Children compete for space in a priority queue capped at the beam limit:
 
 ```python
 def keep(child):
@@ -89,38 +89,38 @@ def keep(child):
     # otherwise the child is discarded
 ```
 
-Ranking compares candidates by status, with ties broken by generation order: the earlier-generated candidate wins. Both rules together make the search fully deterministic, which matters because matches must be reproducible.
+Candidates are ranked by status. Ties go to the candidate generated earlier. Together, these rules make the search deterministic, which is important for reproducible matches.
 
-Discarding a candidate is the beam search trade-off, and it is the one place where the search can be wrong: a placement pruned at depth 2 is never reconsidered, even if it would have led somewhere better. The schedule's job is to make that loss unlikely where it matters.
+Beam search can make a mistake when it discards a candidate. A placement pruned at depth 2 is never reconsidered, even if it would have led to a better result. The schedule aims to make that loss unlikely where it matters.
 
 ## Memory
 
-The search's memory has a hard limit, and the limit is the schedule itself. A layer never holds more candidates than its beam limit, so the number of live candidates at any moment is at most the sum of the caps across the horizon. Each candidate records the board it produced, its status, the pieces still to come, and a link to the first placement of its path. No search tree is kept; a pruned candidate is dropped on the spot and can only reappear through another path.
+The schedule also puts a hard limit on search memory. A layer never holds more candidates than its beam limit, so the total number of live candidates cannot exceed the sum of the caps across the horizon. Each candidate stores its resulting board, status, remaining pieces, and a link to the first placement in its path. The search does not keep a tree. It drops pruned candidates immediately, and they can return only through another path.
 
 ![The search tree with the interior depths covered by an overlay reading unstored nodes](<../../asset/beam_unstored_nodes.png>)
 
-The figure shows what that means across the whole tree: the first layer survives as the answer, the last layer decides which answer wins, and the interior depths between them are never stored. Only the current frontier survives layer by layer; what the interior boards leave behind is at most the evaluations the transposition table happens to keep.
+The figure shows what this means across the tree. The first layer supplies the possible answers, and the last layer determines which answer wins. The interior layers are not stored. Only the current frontier remains as the search moves from layer to layer; the transposition table may retain evaluations from interior boards.
 
-Each layer refills the previous layer's storage, so memory use settles after the first layers and nothing grows with the tree. Branches run one at a time, each copying the shared frontier for its own pass, so peak memory grows by one extra frontier rather than one per branch.
+Each layer reuses the previous layer's storage, so memory use levels off after the initial layers instead of growing with the tree. Branches run one at a time and each copies the shared frontier, so they add only one extra frontier to peak memory, not one per branch.
 
-Most memory sits outside this loop: the per-depth transposition tables, whose sizing is covered in [Transposition table](<Transposition Table>), plus the between-decision state listed on [Overview](<Overview>). The engine reports its total memory use, tables included.
+Most memory is used outside this loop by the per-depth transposition tables, described in [Transposition table](<Transposition Table>), and the between-decision state listed in [Overview](<Overview>). The engine reports total memory use, including the tables.
 
 ## Stopping early
 
-Once the first layer is in place, and again after every later layer, the search checks whether every surviving candidate agrees on the first placement. If the entire beam traces back to one move, expanding deeper cannot change the answer, so the search stops right away and spends the remaining budget nowhere. The same applies if a layer produces no children at all.
+After setting up the first layer and after each later layer, the search checks whether all surviving candidates agree on the first placement. If the entire beam points to one move, deeper searches cannot change the answer, so the search stops and leaves the remaining budget unused. It also stops if a layer produces no children.
 
 ## Unknown futures
 
-When the piece queue beyond the known preview is unknown, the horizon extends into fake pieces, and a search over one guessed future cannot be trusted alone: the search branches over several sampled futures and lets them vote on the first move. The beam limit schedule is computed once for the combined horizon, known placements plus the fake tail, and every branch runs under the same caps, continuing from a shared frontier through the placements covered by known pieces.
+When the queue extends beyond the known preview, the search uses fake pieces to extend its horizon. One guessed future is not enough to trust, so the search explores several sampled futures and lets them vote on the first move. It computes one beam limit schedule for the combined horizon, covering known placements and the fake tail. Every branch follows the same caps and continues from a shared frontier through the known pieces.
 
-That mechanism has its own page: [Fake next and branching](<Fake next and branching>).
+See [Fake next and branching](<Fake next and branching>) for details.
 
 ## What pre-computing buys and costs
 
-Pre-computing the schedule instead of widening iteratively is what makes the rest of the engine simpler:
+Precomputing the schedule instead of widening the beam during the search simplifies the engine in several ways:
 
-- The budget is a count, not a clock, so a search decision takes exactly the same work every time and every game is reproducible.
-- There is no tracking of partial exploration, no re-expansion across widening passes, and no interaction between the time limit and the beam shape.
-- The transposition table's across-move rotation works on a clean, completed search with a known horizon.
+- The budget is a count, not a clock, so each decision does the same amount of work and every game is reproducible.
+- The search does not need to track partial exploration, revisit positions across widening passes, or adapt the beam shape to a time limit.
+- The transposition table can rotate between moves after a completed search with a known horizon.
 
-The cost is the loss of anytime behavior: the upstream engine can return a better answer if given more time mid-decision, while haipa commits to the schedule implied by *n* before it looks at the board. The budget must therefore be chosen before the game runs.
+The trade-off is that haipa loses anytime behavior. The upstream engine can improve its answer if it gets more time during a decision; haipa commits to the schedule implied by *n* before seeing the board. The budget must therefore be chosen before the game starts.

@@ -4,7 +4,7 @@ title: Overview
 
 # Overview
 
-This page walks through one decision of the engine: what goes in, what happens inside, and what comes out. The individual stages have their own pages, linked along the way. The judgment the engine calls for lives in the AI, which has its own page: [AI interface](<../AI/AI interface>).
+This page follows one engine decision from input to output. Each stage has its own page, linked below. The AI supplies the judgment; see [AI interface](<../AI/AI interface>) for details.
 
 ## Glossary
 
@@ -21,7 +21,7 @@ This page walks through one decision of the engine: what goes in, what happens i
 game state -> prepare -> search -> decide -> command string
 ```
 
-The runner calls the engine once per decision, which is normally once per placed piece. The call carries the full game state:
+The runner normally calls the engine once per placed piece. Each call includes the full game state:
 
 - the playfield, 10 cells wide and 22 rows tall, plus one row above it for incoming garbage (the engine's internal board is taller still; the rule layer declares it),
 - the active piece with its position and rotation, in the runner's coordinates,
@@ -30,33 +30,33 @@ The runner calls the engine once per decision, which is normally once per placed
 - the match state: the back-to-back flag, the combo counter, the incoming attack, and the runner's combo table,
 - the search knobs: how deep into the known preview to look, and how much search work to spend,
 
-Preparation then sets up the search:
+Before searching, the engine prepares the current state:
 
-- the playfield and the active piece's position are loaded,
-- the match state (combo, back-to-back, incoming attack) is loaded into the running status,
-- caches are brought up to date: if the AI's parameters changed since the last call, everything cached is dropped; otherwise the transposition tables carry over as described in [Transposition table](<Transposition Table>).
+- It loads the playfield and the active piece's position.
+- It adds the match state (combo, back-to-back, and incoming attack) to the running status.
+- It updates the caches. If the AI's parameters changed since the last call, it clears them. Otherwise, it reuses the transposition tables as described in [Transposition table](<Transposition Table>).
 
-The search itself is the [beam search](<Beam Search>): it expands placements depth by depth under a pre-computed beam limit schedule, scores candidates through the cached board evaluations, stops early when the whole beam agrees on the first placement, and branches over [sampled futures](<Fake next and branching>) when the known preview runs out. The raw material comes from the move generator ([movegen](<../Search/Movegen>)), which reports, for every candidate, the spots its piece can reach and which of them are spins.
+The [beam search](<Beam Search>) expands placements one depth at a time under a precomputed beam limit schedule. It scores candidates using cached board evaluations and stops early if the whole beam agrees on the first placement. When the known preview runs out, it branches over [sampled futures](<Fake next and branching>). The move generator ([movegen](<../Search/Movegen>)) supplies the reachable spots for each piece and identifies spin landings.
 
-The decision is the best candidate the deepest completed layer produced, traced back to its first placement: where the active piece should land, or whether a hold swap should happen first. The [path generator](<../Search/Pathgen>) then turns that placement into the command string.
+The decision is the best candidate from the deepest completed layer, traced back to its first placement. It specifies where the active piece should land, or whether to swap in the held piece first. The [path generator](<../Search/Pathgen>) turns that choice into a command string.
 
 ## What comes out
 
-The engine answers with a command string for the runner, one of three things:
+The engine returns one of three command strings:
 
-- a **movement path**: the inputs that carry the active piece to the chosen landing, including any spin adjustments; the runner executes it and the piece drops,
-- the **hold command**, when the search concluded that swapping the held piece in is better than any placement this turn, and no placement was chosen,
-- an **empty answer**, when there is nothing to do; the runner simply proceeds.
+- A **movement path** carries the active piece to the chosen landing, including any spin adjustments. The runner executes the path, and the piece drops.
+- The **hold command** means the search found that swapping in the held piece is better than any placement this turn, so it did not choose a placement.
+- An **empty answer** means there is nothing to do, so the runner proceeds.
 
-After the piece lands, the runner calls again with the new state, and the cycle repeats.
+Once the piece lands, the runner calls again with the updated state and the cycle repeats.
 
 ## What the engine remembers between calls
 
-Each player gets a separate engine instance, keyed by the player id, and calls for one player are handled one at a time. Between calls the instance keeps:
+Each player has a separate engine instance, keyed by player ID, and calls for that player are handled one at a time. Between calls, the instance keeps:
 
-- the transposition tables and the predicted board, so evaluated positions survive across moves when the prediction holds (see [Transposition table](<Transposition Table>)),
-- the learned per-depth branching estimates that shape the beam limit schedule, reset only when a game restarts,
-- the runner's combo table, cached on first use,
-- the AI's current parameters; a change is detected on the next call and triggers the full cache reset.
+- the transposition tables and predicted board, so previously evaluated positions can be reused when the prediction holds (see [Transposition table](<Transposition Table>)),
+- the learned per-depth branching estimates that shape the beam limit schedule, which reset only when a game restarts,
+- the runner's combo table, cached the first time it is used,
+- the AI's current parameters. The engine checks for changes on the next call and clears all caches if needed.
 
-Given the same game state and the same random state for sampling, a decision is reproducible: the search budget is a count rather than a clock, and every tie is broken the same way every time. The engine's random state can be seeded for reproducible runs.
+With the same game state and random sampling state, a decision is reproducible. The search budget is a count rather than a time limit, and ties are always broken the same way. The engine's random state can also be seeded for repeatable runs.

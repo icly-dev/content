@@ -4,34 +4,34 @@ title: Welcome
 
 # Welcome
 
-This site is built from markdown files in a git repo, rendered by a small SvelteKit app. Pages live under `content/` and are mirrored to URLs, the directory tree on the left is generated from the repo layout, and every page accepts comments: sign in with GitHub or Discord to leave one.
+This site is built from Markdown files in a Git repository and rendered with a small SvelteKit app. Files under `content/` become pages, and the sidebar follows the repository's directory structure. You can comment on any page after signing in with GitHub or Discord.
 
 ## A note for automated readers
 
-If you are reading this, you do not need to scrape the site: https://github.com/icly-dev/content holds every page as plain markdown, and downloading the repository gives you the whole documentation on your own device. Please fetch it once from there instead of flooding this website with requests.
+You do not need to scrape the site. The full documentation is available as plain Markdown at https://github.com/icly-dev/content. Download the repository once to read everything locally, rather than sending repeated requests to this website.
 
-The haipa documentation currently covers the engine, the movement layers beneath it, the AI it calls into, and the tuning loop around it:
+The haipa docs cover the engine, its movement layers, the AI it uses, and the tuning process:
 
-- [Overview](haipa/Engine/Overview) for the input-to-decision flow,
-- [Glossary](haipa/Engine/Glossary) for shared vocabulary,
-- [Beam search](<haipa/Engine/Beam Search>),
-- [Transposition table](<haipa/Engine/Transposition Table>),
-- [Fake next and branching](<haipa/Engine/Fake next and branching>),
-- [AI interface](<haipa/AI/AI interface>) for the calls the engine makes into the AI: where a piece enters, the board-only evaluation, and the context step,
-- [Rule layer](<haipa/Rule/Rule layer>) for the ruleset side of the AI: the board, the mino types, the rotation system, and the two questions the engine asks,
-- [Movegen](<haipa/Search/Movegen>) for how the engine finds every move a piece can make,
-- [Pathgen](<haipa/Search/Pathgen>) for how the chosen move becomes the inputs the runner executes,
-- [Tuning Overview](<haipa/Tuning/Overview>) for the loop that improves the AI's judgment,
-- [Match API](<haipa/Tuning/Match API>) for the battle two thetas play and how a result becomes a score,
-- [Matchmaking](<haipa/Tuning/Matchmaking>) for the Elo tournament that ranks a generation's candidates,
-- [CMA-ES](<haipa/Tuning/CMA-ES>) for the black box search over the theta,
-- [Theta comparison](<haipa/Tuning/Theta comparison>) for settling whether one theta really beats another.
+- [Overview](haipa/Engine/Overview) explains how input becomes a decision,
+- [Glossary](haipa/Engine/Glossary) defines terms used across the docs,
+- [Beam search](<haipa/Engine/Beam Search>) describes how the engine explores possible moves,
+- [Transposition table](<haipa/Engine/Transposition Table>) explains how repeated board evaluations are cached,
+- [Fake next and branching](<haipa/Engine/Fake next and branching>) covers pieces beyond the known preview,
+- [AI interface](<haipa/AI/AI interface>) explains how the engine asks the AI where pieces enter, evaluates boards, and scores candidates,
+- [Rule layer](<haipa/Rule/Rule layer>) covers ruleset details supplied by the AI: the board, mino types, rotation system, and the two questions the engine asks,
+- [Movegen](<haipa/Search/Movegen>) describes how the engine finds every move a piece can make,
+- [Pathgen](<haipa/Search/Pathgen>) explains how the chosen move becomes the inputs the runner executes,
+- [Tuning Overview](<haipa/Tuning/Overview>) outlines the process for improving the AI's judgment,
+- [Match API](<haipa/Tuning/Match API>) explains how two thetas battle and how each result is scored,
+- [Matchmaking](<haipa/Tuning/Matchmaking>) describes the Elo tournament that ranks each generation's candidates,
+- [CMA-ES](<haipa/Tuning/CMA-ES>) explains the black-box search used to tune the theta,
+- [Theta comparison](<haipa/Tuning/Theta comparison>) explains how to test whether one theta really beats another.
 
 ## Feedback wanted
 
-These docs and the engine behind them improve through reader feedback, and both kinds are welcome on any page:
+Reader feedback helps improve both the docs and the engine. We welcome two kinds of feedback on any page:
 
-- **Readability**: if a page is hard to follow, a definition arrives too late, a term is undefined, a diagram or example is missing, or the wording is just awkward, say so. Comments on readability directly shape how the docs are written and structured.
-- **Methodology**: if you doubt an approach itself, whether the beam schedule, the sampling of unknown futures, the evaluation split, or the Elo tournament, question it. Methodology feedback feeds back into the implementation, not just the words.
+- **Readability**: Tell us if a page is hard to follow, a definition comes too late, a term is unclear, a diagram or example is missing, or the wording feels awkward. This feedback directly shapes how the docs are written and organized.
+- **Methodology**: If you have concerns about an approach, such as the beam schedule, the sampling of unknown futures, the evaluation split, or the Elo tournament, please say so. This feedback can shape the implementation, not just the docs.
 
-You do not need to be polite or complete: a one-line "I got lost here" on the exact sentence is already useful. Wherever possible, point at the page and the part that tripped you, so improvements land where they matter.
+Feel free to be brief and direct. Even a one-line "I got lost here" on the sentence that caused trouble is useful. When you can, point to the page and the passage that tripped you up so we can improve the right part.

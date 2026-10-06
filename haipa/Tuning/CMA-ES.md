@@ -4,7 +4,7 @@ title: CMA-ES
 
 # CMA-ES
 
-The battles and the tournament say which candidates are better; something still has to decide which candidates to try next. That is the black box search, CMA-ES, the covariance matrix adaptation evolution strategy. The name is heavier than the idea: the search keeps one cloud over the parameter space, samples each generation's candidates from the cloud, and after every round pulls and reshapes the cloud toward the candidates that ranked best. It needs only rankings, never gradients, which is exactly what a tournament produces. The tournament itself is described in [Matchmaking](<Matchmaking>).
+Battles and the tournament show which candidates are better, but the search still has to choose what to try next. That is the job of the black-box search CMA-ES, the covariance matrix adaptation evolution strategy. The name sounds more complicated than the idea: it keeps a cloud over the parameter space, samples candidates from that cloud, then shifts and reshapes it toward the best-ranked candidates after each round. It needs rankings, not gradients, which is exactly what the tournament provides. See [Matchmaking](<Matchmaking>) for details about the tournament.
 
 ## Glossary
 
@@ -16,16 +16,16 @@ The battles and the tournament say which candidates are better; something still 
 
 ## The space
 
-The search starts at the shipped default theta and never loses sight of it: the cloud's center is expressed as offsets from the defaults, and each offset is scaled by its dimension's size, at least a tenth, so a feature with large numbers does not dominate a feature with small numbers purely through units. The spread starts at sigma 0.3, with a population of 30 candidates per generation by default.
+The search starts from the shipped default theta. The cloud's center is represented as offsets from those defaults, with each offset scaled to its dimension's size and a minimum scale of one tenth. This keeps features with large values from dominating features with small values just because of their units. The spread starts at sigma 0.3, and the default population is 30 candidates per generation.
 
 ## One round
 
-Each round samples the population from the cloud, decodes the points into thetas, and hands them to the Elo tournament with the anchor. The returned ratings steer the cloud: it moves toward the better candidates and reshapes itself, learning which directions of the theta matter and how strongly they interact. Sampling, battles and the update together are one generation.
+Each round samples candidates from the cloud, converts the points into thetas, and sends them to the Elo tournament with the anchor. The ratings guide the next update: the cloud moves toward stronger candidates and changes shape to learn which directions in the theta matter and how those directions interact. Sampling, battling, and updating together make up one generation.
 
 ## The deliverable
 
-There is no champion gate and no best-candidate pick: the deliverable is the cloud's center after each round, decoded back into a theta and written to a file every generation, with one history line appended per generation. Whether a candidate is worth adopting is settled by measurement first, see [Theta comparison](<Theta comparison>), not by its tournament rating alone.
+The search does not select a champion or pick the best candidate. Instead, it writes the cloud's center to a file after every round, decoded as a theta, and appends one line to the history. A candidate's tournament rating alone is not enough to justify adopting it. Test it first using [Theta comparison](<Theta comparison>).
 
 ## Stopping and resuming
 
-The round count is a budget, and the search can also stop itself when its criteria say the cloud has converged. Every generation ends with the search's state written to disk, so a run can be interrupted and later resumed where it left off. The state records its configuration and refuses to resume if the tournament settings no longer match. The state file holds the distribution in pickle form, so load only state files you produced yourself.
+The round count sets the search budget, and the search can also stop when its convergence criteria are met. At the end of each generation, it saves its state so you can interrupt a run and resume it later. The state includes the configuration and will not resume if the tournament settings have changed. It is stored in pickle format, so load only state files you created yourself.

@@ -4,7 +4,7 @@ title: AI interface
 
 # AI interface
 
-The engine drives the whole decision: it expands placements, keeps the caches, and picks the move. The judgment lives in the AI, the pluggable half the engine calls into. Every call hands over the game state at the moment it happens, so the AI answers for the depth it is asked about, not for the game as a whole.
+The engine manages each decision: it expands placements, maintains caches, and chooses a move. The AI is the pluggable part that supplies the judgment. For every call, the engine passes along the current game state, so the AI responds to the position and search depth at hand rather than to the game as a whole.
 
 ## Glossary
 
@@ -12,26 +12,26 @@ Shared engine vocabulary (board, roof, placement, depth, horizon, hold, status, 
 
 | Term | Meaning |
 |------|---------|
-| AI | The pluggable half of the engine: it owns the judgment, and its rule layer answers the engine's ruleset questions. |
-| Rule layer | The part of the AI that answers ruleset questions: the absolute entry spot and the bag randomizer. |
-| Suggested spawn | The absolute entry spot the rule layer gives for a piece, before any adjustment. |
-| Environment | What a placement leaves behind: the queue positions still unplaced, the piece that will sit in hold afterwards, and whether the placement was the swap. |
+| AI | The pluggable part of the engine that supplies judgment and answers ruleset questions through its rule layer. |
+| Rule layer | The part of the AI that answers ruleset questions, including the absolute entry spot and the bag randomizer. |
+| Suggested spawn | The absolute entry spot supplied by the rule layer before any adjustments. |
+| Environment | What remains after a placement: the unplaced queue positions, the piece that will be held, and whether the placement used a hold swap. |
 
 ## Where the engine calls in
 
 ```text
-engine setup:    init, handing the AI its configuration
-each decision:   spawn, every piece entry
-                 eval, every new board
-                 get, every candidate
-                 peak and spread, read for the beam schedule
+engine setup:    give the AI its configuration
+each decision:   ask where each piece enters
+                 evaluate each new board
+                 score each candidate
+                 read the peak and spread for the beam schedule
 ```
 
-The method names are the ones the built-in AI implements; the behavior, not the name, is the contract. When the engine is set up it hands the AI its configuration, and each decision's beam schedule reads the peak and spread configured there (see [Beam search](<../Engine/Beam Search>)).
+The built-in AI supports these interactions; the behavior, not the method names, defines the contract. During setup, the engine passes the AI its configuration. For each decision, the beam schedule reads the configured peak and spread (see [Beam search](<../Engine/Beam Search>)).
 
 ## Where a piece enters
 
-Every piece that enters play during the search passes through the AI's `spawn`. The engine first asks the rule layer for the suggested spawn and then hands the AI:
+The AI helps choose the entry spot for every piece that enters during the search. The engine first asks the rule layer for a suggested spawn, then passes the AI:
 
 - the piece that is entering,
 - how many lines the placement before it cleared,
@@ -40,26 +40,28 @@ Every piece that enters play during the search passes through the AI's `spawn`. 
 - the board it enters on,
 - the status carried to this node.
 
-The AI returns the entry spot the search should use.
+The AI returns the entry spot that the search uses.
 
-The call happens per node, once per piece entry: the hold branch of the current decision, the next piece of every child node, whether it comes from the queue or from hold, and every entry inside the sampled futures. Two paths can ask about the same piece at different depths and get different answers, because each sees its own board and history. The runner can also ask the engine the same question when it places pieces itself. The path for a hold swap starts from the entry spot the AI returned, so the runner's replay matches what the search modeled.
+The engine asks about each piece entry at every node. This includes the hold branch of the current decision, the next piece at each child node (from either the queue or hold), and every entry in the sampled futures. Two paths can ask about the same piece at different depths and get different answers because each path has its own board and history. The runner can ask the engine for the same entry information when placing pieces itself. A hold-swap path starts from the entry spot returned by the AI, so the runner's replay matches the search.
 
-Rulesets use that freedom. In tetr.io, for example, the entry spot moves up when the piece would collide with the stack right at spawn, or when the placement right before it cleared lines, but only while the game's clutch option is on. An AI targeting that ruleset checks the board for the collision, reads the clear count, and knows from its own configuration whether clutch is on; the call hands over exactly those three things at the depth where the piece enters. Gravity is a quieter example: the suggested spawn is absolute, but by the time the engine has thought and the runner starts performing the move, the y coordinate a piece really enters at comes from the AI's spawn answer.
+Rulesets use that freedom. In tetr.io, for example, the entry spot moves up if the piece would collide with the stack at spawn or if the previous placement cleared lines, but only when the game's clutch option is on. An AI for that ruleset checks the board for a collision, reads the line-clear count, and knows from its configuration whether clutch is on. The engine provides those three pieces of information when the piece enters the search.
 
-The shipped AI returns the suggested spawn unchanged: the ruleset it targets adjusts nothing at entry.
+Gravity is another example. The suggested spawn is absolute, but by the time the engine finishes searching and the runner starts the move, the AI's answer determines the piece's actual y coordinate at entry.
+
+The shipped AI returns the suggested spawn unchanged because its target ruleset makes no entry adjustments.
 
 ## The board-only evaluation
 
-The engine calls `eval` once per board it has not seen yet. The evaluation receives:
+The engine evaluates each new board once. The evaluation receives:
 
 - the resulting board, in the engine's row form (one value per row, a bit set for each occupied cell) or as the rule layer's board type, whichever the AI provides an evaluation for,
 - the board's roof.
 
-What it measures is the AI's own business; typical examples are board shape features such as bumpiness and aggregate height. Everything it returns is cached under the board's hash (see [Transposition table](<../Engine/Transposition Table>)), so it must depend on the board and nothing else: two candidates that land different pieces into the same board share one evaluation.
+What the evaluation measures is up to the AI. Typical examples include board-shape features such as bumpiness and aggregate height. The engine caches each result under the board's hash (see [Transposition table](<../Engine/Transposition Table>)), so the result must depend only on the board. Candidates that land different pieces on the same board therefore share one evaluation.
 
 ## The context step
 
-The context step, `get`, runs for every candidate placement. It takes:
+Context scoring runs for every candidate placement. It takes:
 
 - the landing (see [Movegen](<../Search/Movegen>)),
 - the cached evaluation,
@@ -69,7 +71,9 @@ The context step, `get`, runs for every candidate placement. It takes:
 - the status carried from the parent node,
 - the environment.
 
-It returns the child's status: the running assessment that ranks candidates and carries the match state, line clears, combo, and back-to-back, forward. The rewards it adds come from the placement's own events, for example a back-to-back chain, a combo, a spin, or how a specific piece such as the I was spent or held for later. These examples are what the inputs permit judging; which of them a specific AI actually computes is its own, and the docs stop there. The split between the two stages is what makes the evaluation cacheable; the [Transposition table](<../Engine/Transposition Table>) page explains it in full.
+It returns the child's status, a running assessment used to rank candidates and carry match state forward, including line clears, combo, and back-to-back. Rewards can reflect events from the placement, such as a back-to-back chain, a combo, a spin, or whether a piece like the I was used or saved for later. These examples show what the inputs make it possible to judge. Which signals a particular AI uses is up to that AI.
+
+Splitting evaluation into these two stages makes board evaluations cacheable. The [Transposition table](<../Engine/Transposition Table>) page explains the split in detail.
 
 When the AI declares a fixed list of priority pieces, the environment also carries, for each one, how many pieces away it sits in the known preview.
 

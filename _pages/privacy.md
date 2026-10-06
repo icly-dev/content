@@ -4,27 +4,27 @@ icly.dev is a personal site for project notes and bot development. This page exp
 
 ## Account data (login)
 
-Logging in happens exclusively through Discord or GitHub OAuth. We store: your provider handle (the unique username used to identify you), your provider account ID, and your avatar URL. We never store your password or any other provider data, and neither provider is given access to your account here.
+You can sign in only through Discord or GitHub OAuth. We store your provider handle (the unique username used to identify you), your provider account ID, and your avatar URL. We never store your password or other provider data, and neither provider can access your account on this site.
 
 ## Comments
 
-When you comment, we store the text you wrote, the provider handle shown next to it, your avatar, and your vote history on comments. Unlike the previous version of this site, no IP addresses or browser user agents are recorded, and there is no automated spam scanning.
+When you leave a comment, we store its text, the provider handle and avatar displayed with it, and your voting history on comments. Unlike the previous version of the site, we do not record IP addresses or browser user agents, and we do not run automated spam scanning.
 
 ## Anonymous visits
 
-Anonymous visitors get no cookies, no analytics, and no per-visitor records of any kind. Nothing is counted or stored about anonymous browsing.
+The site does not track anonymous visits: it uses no cookies, analytics, or per-visitor records. We do not count or store anonymous browsing activity.
 
 ## Cookies and browser storage
 
-Logging in requires a session cookie so the server can recognize you between requests. Your browser also stores, locally only, your theme preference (light or dark). All of that data stays on your device.
+A session cookie lets the server recognize you between requests while you are signed in. Your browser also stores your theme preference (light or dark) locally. This information stays on your device.
 
 ## Third parties
 
-The site is served through Cloudflare, which handles the connection and may keep edge logs like any CDN. Discord and GitHub only receive the information their own OAuth flows require. We run no advertising and no third-party analytics scripts.
+Cloudflare serves the site, handles connections, and may keep edge logs, as other CDNs do. Discord and GitHub receive only the information their OAuth flows require. We do not run ads or third-party analytics scripts.
 
 ## Retention and deletion
 
-Comments stay until you or a moderator deletes them. Deleted comments are replaced with a `[deleted]` placeholder so conversations keep their context. You can request deletion of your account and associated data at any time through the contact channels below.
+Comments remain until you or a moderator deletes them. To preserve the conversation, a deleted comment is replaced with a `[deleted]` placeholder. You can request deletion of your account and associated data at any time using the contact options below.
 
 ## Children
 
@@ -32,4 +32,4 @@ The site is not directed at children under 13 and does not knowingly collect the
 
 ## Contact and changes
 
-This policy may change as the site changes; the date at the top reflects the last update. If you have questions or deletion requests, reach out on GitHub ([github.com/icly-dev](https://github.com/icly-dev)) or Discord.
+We may update this policy as the site changes. The date at the top shows when it was last updated. If you have questions or want to request deletion, contact us on GitHub ([github.com/icly-dev](https://github.com/icly-dev)) or Discord.
