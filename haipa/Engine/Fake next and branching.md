@@ -41,7 +41,7 @@ Branches are independent only where they must be:
 
 ## Voting
 
-Each branch ends with one winning first move: the best candidate its own search found, traced back to its first placement. Votes are counted per first move, where a first move is identified by its landing position, piece and orientation included, and whether it was a hold swap; the spin grade is not part of the identity, so branches reporting the same landing with different grades count as one vote. Each count also remembers the best status any branch achieved with it.
+Each branch ends with one winning first move: the best candidate its own search found, traced back to its first placement. Votes are counted per first move, where a first move is identified by its landing position, piece and orientation included, and whether it was a hold swap. Each count also remembers the best status any branch achieved with it.
 
 The most-voted first move wins. Ties go to the move with the better status, then to the earlier-generated one. A branch can also end without a placement and with a hold decision instead; the engine remembers such requests, and if no branch produces a placement at all, it falls back to the hold.
 
