@@ -15,7 +15,8 @@ Readers cannot see the code, so pages must stand alone without it.
 - Never reference identifiers the reader cannot look up: class, namespace, function, or member names, source file paths, or links into the source tree.
 - Name mechanisms in Tetris terms, not symbols (`replacement_`) and not generic paraphrases. "On a hash hit the search reuses the stored evaluation" says exactly what happens; "a stored value is reused" does not.
 - Use the specialized vocabulary Tetris players and the Glossary already use (placement, hold, preview, roof, garbage, back-to-back). A paraphrase like "the stashed piece" instead of "hold" reads as imprecision, not simplicity.
-- Exception: user-facing knobs are fine because the reader can act on them. This includes compile-time build options (e.g. `TETRIS_TT_BITS`) and tool output the reader can observe (e.g. profiler report lines).
+- Exception: things the reader can act on are fine, such as compile-time build options (e.g. `TETRIS_TT_BITS`) and outputs the tooling produces (e.g. the comparison report's lines).
+- The reader cannot run code either: usage commands, module paths, and environment variables stay out. Describe what tooling does and produces, not how to invoke it.
 - Developer-only diagnostics behind compile-time defines do not get their own section; fold the actionable interpretation (what a number means, what to do about it) into the section it supports.
 
 ## Start with a glossary
@@ -30,6 +31,8 @@ Readers cannot see the code, so pages must stand alone without it.
 - Describe the system the way the reader meets it: the stages of a decision, what each takes in and produces, and the guarantees between them. A reader should be able to predict the engine's behavior from the page.
 - Leave out internal detail: data structures, field packing, bit tricks, per-entry flags. "One table per search depth, rotated between moves" is architecture; how a slot packs its hash and result is implementation.
 - Do not explain optional items the engine works without. If an item can vanish with no error and no wrong answer, like the runner's combo table, it gets at most a mention.
+- State what the evaluation's inputs permit judging, and stop there: which features and rewards a specific AI computes is its own.
+- The search budget's knob name and its mapping stay undocumented; describe the budget by its effect.
 - Pseudocode and diagrams stay at that level too: data flow, not storage layout.
 
 ## Explain rationale, not just mechanics
