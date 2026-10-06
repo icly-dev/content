@@ -44,7 +44,7 @@ The movement queries underneath, shifts, rotations with kicks, moving down, come
 
 ## Hold first
 
-When the decision starts with a hold swap, the hold input comes first, and the movement starts from the swapped-in piece's spawn, since that piece enters fresh at the standard spot. A decision can be "hold, then place", a pure hold swap, or a plain placement.
+When the decision starts with a hold swap, the hold input comes first, and the movement starts from the swapped-in piece's entry spot: what the AI's spawn call returned for it (see [AI interface](<../AI/AI interface>)). A decision can be "hold, then place", a pure hold swap, or a plain placement.
 
 ## When there is no path
 
