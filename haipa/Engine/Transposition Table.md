@@ -76,19 +76,16 @@ Only occupied rows below the roof contribute to the hash. The search never creat
 
 ## One table per search depth
 
-The engine keeps separate tables: one for each depth in the real-piece horizon, and one for each depth in the sampled fake-piece horizon used to explore unknown future pieces.
+The engine keeps one table for each depth in the horizon.
 
-This separation has two benefits. First, it makes updates between moves cheaper. Rotating or clearing the cache touches one depth's table instead of the whole cache. With one shared table, each entry would need a depth tag, and refreshing a depth would require scanning every entry.
-
-Second, it keeps the tables' lifetimes separate. Fake-piece tables are cleared on every move, while real-piece tables rotate. Keeping them apart prevents fake-piece work from evicting useful real evaluations. Since cached values depend only on the board, sharing a table across depths would still give correct answers. The separation only affects which entries survive between moves. Within one depth, candidates that reach the same board share an entry regardless of the piece placed. Boards that merely share a bucket may cause an eviction, but never a wrong answer.
+This separation makes updates between moves cheaper. Rotating or clearing the cache touches one depth's table instead of the whole cache. With one shared table, each entry would need a depth tag, and refreshing a depth would require scanning every entry. Since cached values depend only on the board, sharing a table across depths would still give correct answers. The separation only affects which entries survive between moves. Within one depth, candidates that reach the same board share an entry regardless of the piece placed. Boards that merely share a bucket may cause an eviction, but never a wrong answer.
 
 ## Lifetime across moves
 
 Between search calls, the engine decides which cached entries to keep:
 
-- If the new board matches the prediction made after the previous chosen placement, the real tables rotate by one depth. The table at depth *d + 1* becomes the table at depth *d*, because positions evaluated one move ahead are now at the current horizon. The deepest table is cleared.
-- If the board does not match the prediction, all real tables are cleared.
-- Fake-piece tables are always cleared because the sampled future changes on each move.
+- If the new board matches the prediction made after the previous chosen placement, the tables rotate by one depth. The table at depth *d + 1* becomes the table at depth *d*, because positions evaluated one move ahead are now at the current horizon. The deepest table is cleared.
+- If the board does not match the prediction, all tables are cleared.
 - When a game resets, the engine clears everything and forgets the prediction.
 
 This rotation is what makes the table especially useful in a live game: most evaluations from the previous search remain valid for the next decision. Here is how it works across two moves:

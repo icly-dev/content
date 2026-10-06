@@ -26,7 +26,8 @@ The ruleset declares its mino types and rotation system. The shipped ruleset is 
 
 ## What the engine asks
 
-The engine asks two questions, each for a different purpose:
+The engine asks one question:
 
 - It asks for the absolute entry spot for a piece. This spot is the same in every situation. In the shipped ruleset, it is unrotated and sits near the top, just left of center. The AI starts from this suggestion and adjusts it to match the real game's entry behavior.
-- It asks for a shuffled draw of the full mino set. In the shipped ruleset, that means all seven tetrominoes. The engine uses the draw to refill fake pieces when the known preview runs out (see [Fake next and branching](<../Engine/Fake next and branching>)).
+
+The ruleset also declares the bag: the full mino set drawn in shuffled order to fill each player's piece queue. In the shipped ruleset, that means all seven tetrominoes. The match simulation uses that draw (see [Match API](<../Tuning/Match API>)).

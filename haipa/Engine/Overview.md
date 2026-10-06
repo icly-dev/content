@@ -13,7 +13,7 @@ This page follows one engine decision from input to output. Each stage has its o
 | Runner | The host program playing the game. It owns the game state and asks the engine for a decision. |
 | Decision | One engine call: look at the current state, choose what to do with the active piece. |
 | Movement path | The sequence of inputs that moves the active piece from its current position to the chosen landing. |
-| Known preview | The piece queue the runner guarantees; see [Fake next and branching](<Fake next and branching>). |
+| Known preview | The piece queue the runner guarantees. |
 
 ## One decision, end to end
 
@@ -36,7 +36,7 @@ Before searching, the engine prepares the current state:
 - It adds the match state (combo, back-to-back, and incoming attack) to the running status.
 - It updates the caches. If the AI's parameters changed since the last call, it clears them. Otherwise, it reuses the transposition tables as described in [Transposition table](<Transposition Table>).
 
-The [beam search](<Beam Search>) expands placements one depth at a time under a precomputed beam limit schedule. It scores candidates using cached board evaluations and stops early if the whole beam agrees on the first placement. When the known preview runs out, it branches over [sampled futures](<Fake next and branching>). The move generator ([movegen](<../Search/Movegen>)) supplies the reachable spots for each piece and identifies spin landings.
+The [beam search](<Beam Search>) expands placements one depth at a time under a precomputed beam limit schedule. It scores candidates using cached board evaluations and stops early if the whole beam agrees on the first placement. The move generator ([movegen](<../Search/Movegen>)) supplies the reachable spots for each piece and identifies spin landings.
 
 The decision is the best candidate from the deepest completed layer, traced back to its first placement. It specifies where the active piece should land, or whether to swap in the held piece first. The [path generator](<../Search/Pathgen>) turns that choice into a command string.
 
@@ -55,8 +55,7 @@ Once the piece lands, the runner calls again with the updated state and the cycl
 Each player has a separate engine instance, keyed by player ID, and calls for that player are handled one at a time. Between calls, the instance keeps:
 
 - the transposition tables and predicted board, so previously evaluated positions can be reused when the prediction holds (see [Transposition table](<Transposition Table>)),
-- the learned per-depth branching estimates that shape the beam limit schedule,
 - the runner's combo table, cached the first time it is used,
-- the AI's current parameters. The engine checks for changes on the next call; when the parameters changed, it clears the transposition tables and the branching estimates and forgets the prediction.
+- the AI's current parameters. The engine checks for changes on the next call; when the parameters changed, it clears the transposition tables and forgets the prediction.
 
-With the same game state and random sampling state, a decision is reproducible. The search budget is a count rather than a time limit, and ties are always broken the same way. The engine's random state can also be seeded for repeatable runs.
+With the same game state, a decision is reproducible. The search budget is a count rather than a time limit, and ties are always broken the same way.

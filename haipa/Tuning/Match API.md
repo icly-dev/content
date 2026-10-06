@@ -48,7 +48,7 @@ On defense, the opponent's remaining attack is added to the player's pending gar
 
 ## Options
 
-Five settings limit each battle. By default, the move cap is 3600 moves per player, the search budget is 100, the known preview depth is 6, the fake-piece horizon is 0, and the branch count is 1. These settings pass directly to the engine, so they also determine how much work each decision can do.
+Three settings limit each battle. By default, the move cap is 3600 moves per player, the search budget is 100, and the known preview depth is 6. These settings pass directly to the engine, so they also determine how much work each decision can do.
 
 ## Results and scoring
 

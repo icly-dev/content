@@ -42,7 +42,7 @@ The AI helps choose the entry spot for every piece that enters during the search
 
 The AI returns the entry spot that the search uses.
 
-The engine asks about each piece entry at every node. This includes the hold branch of the current decision, the next piece at each child node (from either the queue or hold), and every entry in the sampled futures. Two paths can ask about the same piece at different depths and get different answers because each path has its own board and history. The runner can ask the engine for the same entry information when placing pieces itself. A hold-swap path starts from the entry spot returned by the AI, so the runner's replay matches the search.
+The engine asks about each piece entry at every node. This includes the hold branch of the current decision, and the next piece at each child node (from either the queue or hold). Two paths can ask about the same piece at different depths and get different answers because each path has its own board and history. The runner can ask the engine for the same entry information when placing pieces itself. A hold-swap path starts from the entry spot returned by the AI, so the runner's replay matches the search.
 
 Rulesets use that freedom. In tetr.io, for example, the entry spot moves up if the piece would collide with the stack at spawn or if the previous placement cleared lines, but only when the game's clutch option is on. An AI for that ruleset checks the board for a collision, reads the line-clear count, and knows from its configuration whether clutch is on. The engine provides those three pieces of information when the piece enters the search.
 
@@ -79,7 +79,7 @@ When the AI declares a fixed list of priority pieces, the environment also carri
 
 ## The rule layer
 
-The rule layer answers what belongs to the ruleset rather than to judgment: the absolute entry spot, the bag that fills the fake pieces, and the board and ruleset types the rule layer shares with movegen. It has its own page: [Rule layer](<../Rule/Rule layer>).
+The rule layer answers what belongs to the ruleset rather than to judgment: the absolute entry spot, the bag randomizer, and the board and ruleset types the rule layer shares with movegen. It has its own page: [Rule layer](<../Rule/Rule layer>).
 
 ## Optional hooks
 

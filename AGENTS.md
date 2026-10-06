@@ -37,7 +37,7 @@ Readers cannot see the code, so pages must stand alone without it.
 
 ## Explain rationale, not just mechanics
 
-- For every design decision, state why it exists, and lead with the original intent when known. Example: one transposition table per search depth makes the between-moves rotation touch one table instead of the whole cache, and keeps the fake tables' every-move clearing away from the real ones.
+- For every design decision, state why it exists, and lead with the original intent when known. Example: one transposition table per search depth makes the between-moves rotation touch one table instead of the whole cache.
 - State the safety or cost model where it matters: what eviction costs (one recomputation, never a wrong answer), and why a simple policy suffices (within a move the working set is small, entries are written once and read many times).
 - Explain what a mechanism deliberately does not cover, with the reason. The transposition table caches what the board alone determines; line clears, depth, and combo or back-to-back state are applied per candidate, because two placements can end on the same board and differ in all of them.
 

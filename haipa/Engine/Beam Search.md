@@ -18,7 +18,6 @@ Shared engine vocabulary (board, roof, placement, evaluation, depth, horizon, ho
 | Candidate | One placement along one path: the board it produces, its status, and a link back to the first placement of its path. |
 | Iterative widening | Gradually growing the beam, starting narrow and widening while budget remains. The upstream engine that haipa is based on uses this approach. |
 | Branching factor | How many children an average kept position produces, counted as the placements scored from it. |
-| Learned branching estimate | A running average of the observed branching factor at each depth, carried between moves and used to balance the schedule. |
 | Tie-break | The rule that decides between equally good candidates. Here it is generation order, which makes the whole search deterministic. |
 
 ## Overview
@@ -48,8 +47,6 @@ def search(board, horizon, limits):
     return best.first_move
 ```
 
-Sampled-future branching happens outside this loop. The search runs once for each branch, continuing from a shared frontier (see [Fake next and branching](<Fake next and branching>)).
-
 Each surviving candidate stores the *first* placement in its path, including whether it used a hold swap. No matter how deep the search goes, it can therefore return one concrete move for the current piece.
 
 The search scores each child as soon as it is generated. The [transposition table](<Transposition Table>) caches the board evaluation, while the context-dependent part of the status is applied separately to each candidate.
@@ -60,19 +57,6 @@ The schedule is the heart of the design. Given the iteration budget *n* and the 
 
 1. **A total budget.** The first layer is capped at twice the search width, which is determined by the iteration budget. The remaining budget for deeper layers scales with the same width times the horizon. The first layer is kept outside the profile intentionally: it contains every legal placement of the current piece, about 34 in the shipped ruleset. These placements are cheap to evaluate and directly relevant because one will be played. The cap is high enough that it never binds, so no legal first move is discarded before evaluation. The Gaussian profile only distributes the much larger remaining budget across deeper layers.
 2. **A Gaussian depth profile.** The budget is not divided evenly. A Gaussian distributes it across depths, centered at a configurable fraction of the horizon and using a configurable spread. Each depth gets at least 5 percent of the peak. Depths near the center keep most survivors, while both ends get less. Early depths need less budget because they are cheap to revisit and their board evaluations remain in the transposition table. The final depths also get less because there is little opportunity to use their results.
-3. **Branching-factor balancing.** The Gaussian profile shapes the *evaluation work* at each depth, not the number of survivors directly. The engine tracks a learned branching estimate, a running average of how many children each depth produced in previous searches. It divides each depth's budget share by that estimate. A depth with more branching gets a smaller survivor cap, so the number of children scored at each depth follows the profile. Survivor counts therefore move in the opposite direction from branching, and the caps are intentionally uneven even when the profile is smooth. The estimates reset when the AI's parameters change.
-
-The animations below move the peak across the full horizon after the branching estimates have settled. They use a horizon of 7, an iteration budget of 200, and the measured per-depth averages of 68.0, 51.0, 68.7, 54.2, 33.1, 49.5, and 27.0 children per kept node at depths 1 through 7. Solid bars show what actually exists and enters the beam; outlines show the caps. The blue bar is the fixed first-layer cap. At this budget it is higher than the roughly 34 possible first placements, so it never binds. With a narrow spread, the peak covers one or two depths. With a wider spread, survivors cover most of the horizon. In both cases, survivor counts move opposite to branching:
-
-![Beam limits with spread 0.5 while the peak sweeps across the horizon](../../asset/beam_limits_spread_0.5.gif)
-
-![Beam limits with spread 1.5 while the peak sweeps across the horizon](../../asset/beam_limits_spread_1.5.gif)
-
-Balancing by branching keeps the total number of candidates evaluated per decision almost unchanged as the peak and spread move. Across the full sweep above, the difference is within 0.1 percent.
-
-Branching estimates start at 1, so early deep searches follow the unadjusted profile. The estimates settle within a few searches, as each search updates every depth it expands. During this warmup, the work is not yet balanced because there is no learned branching rate to divide by. The animation below shows the same sweep before the estimates have been learned:
-
-![Beam limits during warmup, spread 1.5, before the branching estimates have been learned](../../asset/beam_limits_warmup_spread_1.5.gif)
 
 The AI's configuration sets the two profile controls, peak position and spread. Changing the configuration changes where the search concentrates its work.
 
@@ -101,19 +85,13 @@ The schedule also puts a hard limit on search memory. A layer never holds more c
 
 The figure shows what this means across the tree. The first layer supplies the possible answers, and the last layer determines which answer wins. The interior layers are not stored. Only the current frontier remains as the search moves from layer to layer; the transposition table may retain evaluations from interior boards.
 
-Each layer reuses the previous layer's storage, so memory use levels off after the initial layers instead of growing with the tree. Branches run one at a time and each copies the shared frontier, so they add only one extra frontier to peak memory, not one per branch.
+Each layer reuses the previous layer's storage, so memory use levels off after the initial layers instead of growing with the tree.
 
 Most memory is used outside this loop by the per-depth transposition tables, described in [Transposition table](<Transposition Table>), and the between-decision state listed in [Overview](<Overview>). The engine reports total memory use, including the tables.
 
 ## Stopping early
 
 After setting up the first layer and after each later layer, the search checks whether all surviving candidates agree on the first placement. If the entire beam points to one move, deeper searches cannot change the answer, so the search stops and leaves the remaining budget unused. It also stops if a layer produces no children.
-
-## Unknown futures
-
-When the queue extends beyond the known preview, the search uses fake pieces to extend its horizon. One guessed future is not enough to trust, so the search explores several sampled futures and lets them vote on the first move. It computes one beam limit schedule for the combined horizon, covering known placements and the fake tail. Every branch follows the same caps and continues from a shared frontier through the known pieces.
-
-See [Fake next and branching](<Fake next and branching>) for details.
 
 ## What pre-computing buys and costs
 
