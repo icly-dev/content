@@ -4,6 +4,8 @@ title: First-move selection experiment
 
 # First-move selection experiment
 
+**Status: completed** ✅
+
 An experiment testing how the beam search should turn its final answer into a move. The hypothesis came from the observation that the search throws away most of what it learned: it plays the first move of one single best leaf and ignores the rest of the surviving tree.
 
 Shared engine vocabulary (board, evaluation, status, depth, horizon, hold, search budget) is defined in the [Glossary](<../Engine/Glossary>); beam search terms (beam, survivor, frontier, first move) in [Beam search](<../Engine/Beam Search>); battle terms (seat, seed pair, APL, standard error, z) in [Theta comparison](<../Tuning/Theta comparison>). This page adds:
