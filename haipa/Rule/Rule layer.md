@@ -10,13 +10,13 @@ The AI has two halves: the judgment, which the engine calls per board and per ca
 
 | Term | Meaning |
 |------|---------|
-| Ruleset | The rules the game runs under: the mino types, the rotation system, the bag, and the entry spots. Each AI carries one. |
+| Ruleset | The rules the game runs under: the mino types, the rotation system, the bag, and the entry spots. Each rule layer carries one. |
 | Mino | One piece shape the ruleset offers; the tetromino set has seven, I, O, T, S, Z, J, and L. |
 | Rotation system | How pieces turn, and which kicks apply when a turn is blocked. |
 
 ## The board
 
-The AI declares the board type, and that type is the canonical one: the engine adopts it and reads the board's width and height from it instead of fixing its own. The rule layer and movegen inside the AI must use the same board and ruleset types, and the engine checks that at build time.
+The rule layer declares the board type, and that type is the canonical one: the engine adopts it and reads the board's width and height from it instead of fixing its own. The AI's judgment and movegen must use the same board and ruleset types, and the engine checks that at build time.
 
 In the ruleset this engine ships with, the board is 10 cells wide and 24 rows tall.
 
