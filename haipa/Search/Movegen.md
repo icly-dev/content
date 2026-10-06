@@ -34,7 +34,7 @@ Movegen takes:
 - the movement options the runner declares (for example, whether 180-degree rotations are allowed),
 - the candidate's context: the current stack roof, and whether the placement that produced this board cleared lines.
 
-It reports every reachable landing: a position and orientation, plus an auxiliary tag. The tag is part of the search itself, not of the movement mechanics: the shipped engine grades T-spins with it (none, mini, or full); another search could carry something else. Reports arrive one at a time through a callback as movegen finds them, not as a list: the consumer places and scores each landing immediately. Movegen runs for every candidate at every depth, so this keeps the hot path free of per-candidate allocation; a return value would mean a growable result list on every call.
+It reports every reachable landing: a position and orientation, plus an auxiliary tag. The tag is part of the search itself, not of the movement mechanics: the shipped engine grades T-spins with it (none, mini, or full); another search could carry something else. Reports arrive one at a time as movegen finds them, and the consumer places and scores each landing immediately; movegen runs for every candidate at every depth.
 
 It never scores anything. Where the piece can go is mechanics; whether that is good is judgment, and judgment lives in the evaluation. Movegen must be fast and exhaustive over mechanics, and stay correct no matter how the evaluation changes.
 
@@ -60,7 +60,7 @@ Spin detection runs over the landings of the spin piece only, as a grading pass 
 3. **Front corners decide the grade.** Both corners on the side the piece points toward occupied means full.
 4. **The kick test confirms the rest.** The corner rule alone can mislabel a slot the piece merely fell into, so the weaker cases must rotate out of the spot and back into exactly the same spot. The kick size on the way separates the strongest twist, which also counts as full, from a mini.
 
-One placement can be delivered more than once: different kick sequences can reach the same spot with different strengths, so it is reported once per grade, for example no spin, mini, and full. The callback makes this natural: repeated delivery is just more calls, no list to grow, and the consumer evaluates each report as its own candidate. The ruleset scores the variants differently, which is what lets the search prefer a full spin over a mini at the same spot.
+One placement can be delivered more than once: different kick sequences can reach the same spot with different strengths, so it is reported once per grade, for example no spin, mini, and full. The consumer evaluates each report as its own candidate, and the ruleset scores the variants differently, which is what lets the search prefer a full spin over a mini at the same spot.
 
 ## What it costs and where it runs
 

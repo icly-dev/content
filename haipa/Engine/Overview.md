@@ -24,7 +24,7 @@ game state -> prepare -> search -> decide -> command string
 The runner calls the engine once per decision, which is normally once per placed piece. The call carries the full game state:
 
 - the playfield, 10 cells wide and 22 rows tall, plus one row above it for incoming garbage,
-- the active piece with its position and rotation, in the runner's coordinates (converted internally, including the vertical axis direction),
+- the active piece with its position and rotation, in the runner's coordinates,
 - the held piece and whether holding is currently allowed, plus whether 180-degree spins are allowed,
 - the known preview, whose length sets how deep the search can look with certainty,
 - the match state: the back-to-back flag, the combo counter, the incoming attack, and the combo table,
@@ -32,7 +32,7 @@ The runner calls the engine once per decision, which is normally once per placed
 
 Preparation then sets up the search:
 
-- the playfield is loaded into the engine's internal board representation and the piece position is translated,
+- the playfield and the active piece's position are loaded,
 - the match state (combo, back-to-back, incoming attack) is loaded into the running status,
 - caches are reconciled: if the AI's parameters changed since the last call, everything cached is dropped; otherwise the transposition tables carry over as described in [Transposition table](<Transposition Table>).
 

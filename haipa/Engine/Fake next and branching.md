@@ -10,7 +10,7 @@ Shared engine vocabulary (board, depth, horizon, hold, status, search budget) is
 
 | Term | Meaning |
 |------|---------|
-| Known preview | The piece queue the host guarantees for the next decisions. |
+| Known preview | The piece queue the runner guarantees for the next decisions. |
 | Fake pieces | Randomly sampled pieces standing in for queue positions beyond the known preview. |
 | Fake horizon | How many placements deep the search goes on fake pieces. |
 | Branch | One independently sampled continuation of the search past the known preview. |
@@ -27,7 +27,7 @@ Trusting a single guess would bias the search: a continuation that happens to su
 
 Each branch draws its tail without replacement from a shuffled bag, refilling a fresh shuffled bag when one runs out, so a tail respects the same bag invariant the game's real queue does. Different branches draw independently, so two branches rarely agree on the whole tail. Sampling consumes the engine's random state, which keeps every decision reproducible for a given seed.
 
-The fake horizon length and the branch count are host-side knobs: the profiler exposes them as flags, and the search API takes both as parameters. With a fake horizon but a branch count of one, a single sampled future is still used, which is the cheapest configuration that still looks past the preview.
+The fake horizon length and the branch count are runner-side knobs: the profiler exposes them as flags, and the search API takes both as parameters. With a fake horizon but a branch count of one, a single sampled future is still used, which is the cheapest configuration that still looks past the preview.
 
 ## How branches share work
 
