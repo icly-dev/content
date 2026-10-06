@@ -14,39 +14,41 @@ Shared engine vocabulary is defined in the [Glossary](<../Engine/Glossary>), and
 
 | Term | Meaning |
 |------|---------|
-| Input path | The sequence of inputs the runner executes to carry the piece from where it is to the chosen landing. One character per input. |
-| Frame | The unit of execution time the runner plays in. Every input costs some number of frames, so candidate paths can be compared by total time. |
-| Held shift | One input that slides the piece several cells at once, as if the direction were held down; it costs one frame per cell moved. A single-cell shift costs the same as a rotation. |
+| Input path | The sequence of inputs the runner executes to carry the piece to the chosen landing. One character per input. |
+| Frame | The unit of execution time the runner plays in. Every input costs some frames, so paths can be compared by total time. |
+| Held shift | One input that slides the piece several cells at once, as if the direction were held down; it costs one frame per cell. A single-cell shift costs the same as a rotation. |
 
 ## The contract
 
-Pathgen takes the winning landing, the piece's current position and orientation (or, when the decision starts with a hold swap, the swapped-in piece's spawn), the board, and the movement options the runner declares. It returns the input path, or nothing.
+Pathgen takes the winning landing, the piece's current position and orientation (or the swapped-in piece's spawn, when the decision starts with a hold swap), the board, and the runner's movement options. It returns the input path, or nothing.
 
-It always has the full option set, regardless of movegen's speed restriction: the landing exists on the board, so any real route to it is valid, and a shorter route through floating movement may be used even for a piece whose landings were enumerated without floating.
+It always has the full option set, regardless of movegen's speed restriction: the landing exists on the board, so any real route to it is valid, including a floating route shorter than the one that found it.
 
 ## Searching for the fastest inputs
 
-Pathgen runs a shortest-path search over movement states. A state is the piece's position, its true orientation, and the spin collected so far. From each state the possible moves are the runner's inputs:
+Pathgen runs a shortest-path search over movement states. A state is the position, the true orientation, and the spin collected so far. The moves are the runner's inputs:
 
 - shift one cell left or right, or a held shift that slides until something blocks,
 - rotate, clockwise, counterclockwise, and 180 degrees when allowed, with the ruleset's kick tables applied,
 - soft drop one row, sonic drop to the resting spot, or hard drop.
 
-Every input adds its frame cost, and the search prefers the cheapest total time, replacing a route whenever the same state is reached more cheaply. It stops when the landing is reached by a hard drop: the final input is always a hard drop, which locks the piece exactly where the landing promised. Because hard drop costs no frames and the search is deterministic in its tie-breaking, the same decision always produces the same path.
+Every input adds its frame cost, and the cheapest total time wins; a state reached again more cheaply replaces its route. The search stops at a hard drop that reaches the landing, so the final input is always a hard drop and locks the piece exactly where promised. Hard drop costs no frames, and tie-breaking is deterministic: the same decision always yields the same path.
 
 ## Reproducing the promised spin
 
-The spin grade the beam scored is a promise, and the game will only honor it if the executed inputs actually end with the right rotation. So the spin is part of the movement state: after every rotation along the path it is re-derived from the board with the same corner and kick rules the [movegen sweep](<Movegen#spin-classification>) used, and a route that arrives with the wrong spin does not count as reaching the goal. The output path therefore ends in a rotation that produces the promised spin, or there is no path at all.
+The scored spin grade is a promise: the game only honors it if the executed inputs end with the right rotation. So the spin is part of the movement state, re-derived after every rotation with the same corner and kick rules the [movegen sweep](<Movegen#spin-classification>) used. A route arriving with the wrong spin does not reach the goal, so the output path ends in a rotation that produces the promised spin, or there is no path.
 
-This is also what keeps the two layers consistent: both grade spins with the same rules, so a grade that was scored is a grade the runner can reproduce. The underlying movement queries, shifts, rotations with kicks, and descent, all come from the same public movement library, [fast-reachability](https://github.com/icly-dev/fast-reachability), that [movegen](<Movegen>) is built on.
+Both layers grade spins with the same rules, so a scored grade is a reproducible grade.
+
+The movement queries underneath, shifts, rotations with kicks, descent, come from the same public library, [fast-reachability](https://github.com/icly-dev/fast-reachability), that [movegen](<Movegen>) is built on.
 
 ## Hold first
 
-When the decision starts with a hold swap, the hold input is prepended and the movement part starts from the swapped-in piece's spawn, since that piece enters fresh at the standard spot. A decision can thus be "hold, then place", a pure hold swap, or a plain placement.
+When the decision starts with a hold swap, the hold input comes first, and the movement starts from the swapped-in piece's spawn, since that piece enters fresh at the standard spot. A decision can be "hold, then place", a pure hold swap, or a plain placement.
 
 ## When there is no path
 
-If the winning landing cannot be reached by any input sequence, the answer degrades to no movement path rather than a wrong one, and the runner simply proceeds without inputs. Under normal operation this does not occur: the landing was found through real movement, and pathgen has at least the options that found it.
+If the winning landing cannot be reached by any input sequence, the answer degrades to no path rather than a wrong one, and the runner proceeds without inputs. This should not occur in normal operation: the landing was found through real movement, and pathgen has at least the options that found it.
 
 ## The inputs the runner receives
 
