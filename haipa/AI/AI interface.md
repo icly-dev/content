@@ -52,7 +52,7 @@ The shipped AI returns the suggested spawn unchanged: the ruleset it targets adj
 
 The engine calls `eval` once per board it has not seen yet. The evaluation receives:
 
-- the resulting board, in the engine's row form or in the AI's own board type, whichever the AI provides an evaluation for,
+- the resulting board, in the engine's row form or as the rule layer's board type, whichever the AI provides an evaluation for,
 - the board's roof.
 
 What it measures is the AI's own business; typical examples are board shape features such as bumpiness and aggregate height. Everything it returns is cached under the board's hash (see [Transposition table](<../Engine/Transposition Table>)), so it must depend on the board and nothing else: two candidates that land different pieces into the same board share one evaluation.
@@ -79,4 +79,4 @@ The rule layer answers what belongs to the ruleset rather than to judgment: the 
 
 ## Optional hooks
 
-Three parts of the interface are optional, and the engine works without each of them: a custom board hash instead of the built-in one, a conversion from the AI's board to the engine's row form, and the priority pieces behind the piece distances in the environment.
+Three parts of the interface are optional, and the engine works without each of them: a custom board hash instead of the built-in one, a conversion from the board to the engine's row form, and the priority pieces behind the piece distances in the environment.
