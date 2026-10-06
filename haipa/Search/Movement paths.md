@@ -4,7 +4,7 @@ title: Movement paths
 
 # Movement paths
 
-The [beam search](<../Engine/Beam Search>) ends with one winning [landing](<Landings>): a position, an orientation, and a spin label. The runner cannot act on that directly; it executes inputs. The path search is the last layer of the engine, and it runs once per decision: it turns the chosen landing into the string of inputs the runner performs.
+The [beam search](<../Engine/Beam Search>) ends with one winning [landing](<Landings>): a position, an orientation, and the tag the landing search attaches to it (the spin grade, in the shipped engine). The runner cannot act on that directly; it executes inputs. The path search is the last layer of the engine, and it runs once per decision: it turns the chosen landing into the string of inputs the runner performs.
 
 Everything before this layer runs thousands of times per decision and must be cheap. This layer runs once and must be exact.
 
@@ -36,9 +36,9 @@ Every input adds its frame cost, and the search prefers the cheapest total time,
 
 ## Reproducing the promised spin
 
-The spin label the beam scored is a promise, and the game will only honor it if the executed inputs actually end with the right rotation. So the spin is part of the movement state: after every rotation along the path it is re-derived from the board with the same corner and kick rules the [landing sweep](<Landings#spin-classification>) used, and a route that arrives with the wrong spin does not count as reaching the goal. The output path therefore ends in a rotation that produces the promised spin, or there is no path at all.
+The spin grade the beam scored is a promise, and the game will only honor it if the executed inputs actually end with the right rotation. So the spin is part of the movement state: after every rotation along the path it is re-derived from the board with the same corner and kick rules the [landing sweep](<Landings#spin-classification>) used, and a route that arrives with the wrong spin does not count as reaching the goal. The output path therefore ends in a rotation that produces the promised spin, or there is no path at all.
 
-This is also what keeps the two layers consistent: both grade spins with the same rules, so a label that was scored is a label the runner can reproduce.
+This is also what keeps the two layers consistent: both grade spins with the same rules, so a grade that was scored is a grade the runner can reproduce.
 
 ## Hold first
 

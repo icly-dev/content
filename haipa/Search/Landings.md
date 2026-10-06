@@ -19,6 +19,7 @@ Shared engine vocabulary (board, roof, placement, depth, horizon, hold) is defin
 | Spawn | The fixed spot where a newly entering piece appears, near the top of the field. |
 | Landing | A spot where the piece can come to rest: a position and orientation on the board, before any lines clear. A [placement](<../Engine/Glossary>) is a landing plus the clears it causes. |
 | Resting | A property of a landing: the piece cannot move further down from that spot. |
+| Tag | An extra value attached to every landing by the search. Its meaning belongs to the search layer, not to the movement mechanics; in the shipped engine it grades T-spins. |
 | Kick | The nudge a ruleset applies when a rotation is blocked; kicks can shift a piece sideways or upward while it rotates. |
 | Floating movement | Inputs that let the piece descend under control: soft drop, one row at a time, and sonic drop, straight down to the resting spot without locking. Floating is what lets a piece slide sideways under an overhang partway through its descent. |
 | Hard drop | Straight down to the resting spot, locking immediately. |
@@ -34,7 +35,7 @@ The landing search takes:
 - the movement options the runner declares (for example, whether 180-degree rotations are allowed),
 - the candidate's context: the current stack roof, and whether the placement that produced this board cleared lines.
 
-It reports every reachable landing, each labeled with a spin type: none, mini, or full. The reports arrive one at a time through a callback as the sweep finds them, not as a collected list: the consumer places and scores each landing immediately and discards what it does not want. Since the sweep runs for every candidate at every depth, this streaming form keeps the hot path free of per-candidate allocation, and memory stays flat no matter how many landings a piece has; returning the same information would require a growable result list on every call.
+It reports every reachable landing: a position and orientation, plus an auxiliary tag carried alongside. The tag is part of the search itself, not of the movement mechanics: its meaning is owned by the layer above, and the shipped engine uses it to grade T-spins (none, mini, or full); a different search could carry something else entirely. The reports arrive one at a time through a callback as the sweep finds them, not as a collected list: the consumer places and scores each landing immediately and discards what it does not want. Since the sweep runs for every candidate at every depth, this streaming form keeps the hot path free of per-candidate allocation, and memory stays flat no matter how many landings a piece has; returning the same information would require a growable result list on every call.
 
 It never scores anything. Where the piece can go is mechanics; whether going there is good is judgment, and judgment lives entirely in the AI's evaluation. This split is deliberate: the landing search must be fast and exhaustive over mechanics, and it must stay correct no matter how the evaluation changes.
 
@@ -74,16 +75,16 @@ Two consequences are worth stating plainly:
 
 ## Spin classification
 
-Spin detection runs over the landings of the spin piece only, as a labeling pass on top of the sweep. In the ruleset this engine ships with, that piece is the T, and the labels are none, mini, and full.
+Spin detection runs over the landings of the spin piece only, as a grading pass on top of the sweep. In the ruleset this engine ships with, that piece is the T, and the tag grades each landing none, mini, or full.
 
 The classification proceeds in steps:
 
 1. **Pinned.** A landing can only be a spin if the piece cannot move down from it; a piece that can still fall has not spun.
 2. **Corners.** The four diagonal cells around the piece's center are checked against the board. With enough of them occupied, the piece is wedged in a way only a rotation can produce.
 3. **Front corners decide the grade.** The two corners on the side the piece points toward separate a full spin from a weaker one: both occupied means full.
-4. **The kick test confirms the rest.** The corner rule alone can mislabel a slot the piece merely fell into, so in the weaker cases the sweep verifies that the piece can rotate out of the spot and back into exactly the same spot. Only then is a spin label applied, and the size of the kick used on the way distinguishes the strongest twist, which also counts as full, from a mini.
+4. **The kick test confirms the rest.** The corner rule alone can mislabel a slot the piece merely fell into, so in the weaker cases the sweep verifies that the piece can rotate out of the spot and back into exactly the same spot. Only then is a spin grade applied, and the size of the kick used on the way distinguishes the strongest twist, which also counts as full, from a mini.
 
-One placement can be delivered more than once: different kick sequences can reach the same resting spot with different strengths, and the spot is then reported once per applicable label, for example once with no spin, once as a mini, and once as a full. The callback form is what makes this natural: repeated delivery of one spot is just more calls, with no list to grow and no special case at the consumer, which evaluates each report as its own candidate. The ruleset scores the variants differently, so treating them separately is what lets the search prefer a full spin over a mini at the same spot.
+One placement can be delivered more than once: different kick sequences can reach the same resting spot with different strengths, and the spot is then reported once per applicable grade, for example once with no spin, once as a mini, and once as a full. The callback form is what makes this natural: repeated delivery of one spot is just more calls, with no list to grow and no special case at the consumer, which evaluates each report as its own candidate. The ruleset scores the variants differently, so treating them separately is what lets the search prefer a full spin over a mini at the same spot.
 
 ## What it costs and where it runs
 
