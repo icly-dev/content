@@ -39,9 +39,17 @@ It reports every reachable landing: a position and orientation, plus an auxiliar
 
 It never scores anything. Where the piece can go is mechanics; whether that is good is judgment, and judgment lives in the evaluation. Movegen must be fast and exhaustive over mechanics, and stay correct no matter how the evaluation changes.
 
-## One sweep per piece
+## Built on fast-reachability
 
-The core of movegen is a sweep, and it does not walk positions one by one. For each orientation of the piece it keeps one bitboard: every cell where that orientation fits. One operation advances the whole set at once:
+Movegen is a thin layer over a separate, public movement library, [fast-reachability](https://github.com/icly-dev/fast-reachability). The library owns the movement model: the bitboard representation, the reachability sweep described next, and the movement checker that answers, for any spot, whether the piece can shift or descend from there, and where a rotation with its kicks lands.
+
+Spin grading and [pathgen](<Pathgen>) both ask that checker, so there is one definition of "can move".
+
+haipa supplies the rest: the ruleset's pieces and kick tables, the per-candidate options (the restriction below), spin grading, and the pathgen search. The movement model stays in an independent, benchmarked library; the engine's code stays about policy, not geometry.
+
+## The sweep
+
+The sweep is fast-reachability's, and it does not walk positions one by one. For each orientation of the piece it keeps one bitboard: every cell where that orientation fits. One operation advances the whole set at once:
 
 - shift the entire set one cell left or right, minus wherever that would overlap,
 - rotate the entire set into the neighboring orientation, applying the ruleset's kick tables,
@@ -72,18 +80,6 @@ Two consequences:
 
 - Movement options depend on the candidate's history, not only on the board: the clear count travels with the candidate.
 - The restriction shapes only movegen. The [pathgen](<Pathgen>) always has the full option set, so whatever the beam chose can be executed.
-
-## Built on fast-reachability
-
-Movegen is a thin layer over a separate, public movement library, [fast-reachability](https://github.com/icly-dev/fast-reachability). The library owns the movement model:
-
-- the bitboard representation the sweep runs on,
-- the sweep itself: shifts, rotations with kick tables, descent,
-- the movement checker: can the piece shift or descend from a spot, and where does a rotation with its kicks land.
-
-Spin grading and [pathgen](<Pathgen>) both ask that checker, so there is one definition of "can move".
-
-haipa supplies the rest: the ruleset's pieces and kick tables, the per-candidate options (the restriction above), spin grading, and the pathgen search. The movement model stays in an independent, benchmarked library; the engine's code stays about policy, not geometry.
 
 ## Spin classification
 
