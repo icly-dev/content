@@ -29,7 +29,3 @@ There is no champion gate and no best-candidate pick: the deliverable is the clo
 ## Stopping and resuming
 
 The round count is a budget, and the search can also stop itself when its criteria say the cloud has converged. Every generation ends with the search's state written to disk, so a run can be interrupted and later resumed where it left off. The state records its configuration and refuses to resume if the tournament settings no longer match. The state file holds the distribution in pickle form, so load only state files you produced yourself.
-
-## Running it
-
-`python3 -m haipa.cmaes [threads] [generations] [state-file]`, printing one line per generation with the population's and the anchor's Elo, the spread of the cloud, and the elapsed time.

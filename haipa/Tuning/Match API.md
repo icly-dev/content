@@ -4,7 +4,7 @@ title: Match API
 
 # Match API
 
-The match API plays battles between two thetas and reports what happened. Everything in tuning is measured with it: the tournament's rating updates and the comparison tool's verdicts both come from battles played here. The Python side exposes it as `haipa.match`; underneath sits the engine library, found through the `HAIPA_LIB` environment variable or the build directory.
+The match API plays battles between two thetas and reports what happened. Everything in tuning is measured with it: the tournament's rating updates and the comparison tool's verdicts both come from battles played here.
 
 ## Glossary
 

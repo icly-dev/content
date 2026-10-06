@@ -4,7 +4,7 @@ title: Theta comparison
 
 # Theta comparison
 
-Sooner or later tuning produces a theta that claims to be better, and a claim is not adoption. The comparison tool settles the claim the slow, honest way: many battles, counted properly. Run it as `python3 -m haipa.compare <theta.bin|defaults> <theta.bin|defaults> [games] [seed]`, 128 games by default. The battles themselves are the [Match API](<Match API>).
+Sooner or later tuning produces a theta that claims to be better, and a claim is not adoption. The comparison tool settles the claim the slow, honest way: many battles, counted properly, 128 games by default. The battles themselves are the [Match API](<Match API>).
 
 ## Glossary
 
