@@ -75,12 +75,7 @@ When the AI declares priority pieces, the environment also carries how far away 
 
 ## The rule layer
 
-The rule layer answers what belongs to the ruleset rather than to judgment:
-
-- `suggest_spawn`: the absolute entry spot for a piece, the same for every situation, and the starting point the spawn adjustment works from.
-- `make_bag`: one draw of the randomizer's bag, which fills the fake pieces when the known preview runs out (see [Fake next and branching](<../Engine/Fake next and branching>)).
-
-It also names the board and ruleset types the AI speaks; the engine checks that they match its own.
+The rule layer answers what belongs to the ruleset rather than to judgment: the absolute entry spot, the bag that fills the fake pieces, and the board and ruleset types the engine checks against its own. It has its own page: [Rule layer](<../Rule/Rule layer>).
 
 ## Optional hooks
 
