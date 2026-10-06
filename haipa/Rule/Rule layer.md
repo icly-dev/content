@@ -4,7 +4,7 @@ title: Rule layer
 
 # Rule layer
 
-The AI has two halves: the judgment, which the engine calls per board and per candidate, and the rule layer, which answers what belongs to the ruleset rather than to judgment. The engine asks, the rule layer answers, and the questions come with the game state of the moment, as described in [AI interface](<../AI/AI interface>).
+The AI has two halves: the judgment, which the engine calls per board and per candidate, and the rule layer, which answers what belongs to the ruleset rather than to judgment. The rule layer is the source of truth for the ruleset: the engine and the judgment adapt to it, never the other way around. The engine asks, the rule layer answers, and the questions come with the game state of the moment, as described in [AI interface](<../AI/AI interface>).
 
 ## Glossary
 
