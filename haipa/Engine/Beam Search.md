@@ -105,6 +105,14 @@ Ranking compares candidates by status, with ties broken by generation order: the
 
 Discarding a candidate is the beam search trade-off, and it is the one place where the search can be wrong: a placement pruned at depth 2 is never reconsidered, even if it would have led somewhere better. The schedule's job is to make that loss unlikely where it matters.
 
+## Memory
+
+The search's memory is bounded by construction, and the bound is the schedule itself. A layer never holds more candidates than its beam limit, so the number of live candidates at any moment is at most the sum of the caps across the horizon. Each candidate is a small fixed-size record: the board it produced, its scores, the pieces still to come, and a link to the first placement of its path. No search tree is kept; a pruned candidate is dropped on the spot and can only reappear through another path.
+
+The frontier lives in two reusable buffers, one for the current layer and one for the next. Each layer refills the next buffer from scratch and the two then swap, so allocation settles after the first layers and the same storage is reused for the rest of the decision. When the search branches over sampled futures, the shared frontier is copied once per branch, one branch at a time, so peak memory grows by one extra frontier rather than one per branch.
+
+The dominant memory consumers sit outside this loop: the per-depth transposition tables, whose sizing is covered in [Transposition table](<Transposition Table>), plus the bookkeeping that survives between decisions. The engine reports its total footprint, tables included.
+
 ## Early halting
 
 After the first layer is admitted, and again after every later layer, the search checks whether every surviving candidate agrees on the first placement. If the entire beam traces back to one move, expanding deeper cannot change the answer, so the search halts immediately and spends the remaining budget nowhere. The same applies if a layer produces no children at all.
