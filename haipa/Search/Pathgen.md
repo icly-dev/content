@@ -15,8 +15,8 @@ Shared engine vocabulary is defined in the [Glossary](<../Engine/Glossary>), and
 | Term | Meaning |
 |------|---------|
 | Input path | The sequence of inputs the runner executes to carry the piece to the chosen landing. One character per input. |
-| Frame | The unit of execution time the runner plays in. Every input costs some frames, so paths can be compared by total time. |
-| Held shift | One input that slides the piece several cells at once, as if the direction were held down; it costs one frame per cell. A single-cell shift costs the same as a rotation. |
+| Frame | The unit of execution time the runner plays in. Inputs carry frame costs, so paths can be compared by total time. |
+| Held shift | One input that slides the piece several cells at once, as if the direction were held down. |
 
 ## The contract
 
@@ -32,7 +32,7 @@ Pathgen runs a shortest-path search over movement states. A state is the positio
 - rotate, clockwise, counterclockwise, and 180 degrees when allowed, with the ruleset's kick tables applied,
 - soft drop one row, sonic drop to the resting spot, or hard drop.
 
-Every input adds its frame cost, and the cheapest total time wins; a state reached again more cheaply replaces its route. The search stops at a hard drop that reaches the landing, so a path that places a piece always ends in a hard drop that locks it exactly where promised. Hard drop costs no frames, and tie-breaking is deterministic: the same decision always yields the same path.
+Each input carries its cost, and the cheapest total time wins; a state reached again more cheaply replaces its route. The search stops at a hard drop that reaches the landing, so a path that places a piece always ends in a hard drop that locks it exactly where promised. Tie-breaking is deterministic: the same decision always yields the same path.
 
 ## Reproducing the promised spin
 

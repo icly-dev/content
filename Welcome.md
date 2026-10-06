@@ -23,6 +23,6 @@ The haipa documentation currently covers the engine, the movement layers beneath
 These docs and the engine behind them improve through reader feedback, and both kinds are welcome on any page:
 
 - **Readability**: if a page is hard to follow, a definition arrives too late, a term is undefined, a diagram or example is missing, or the wording is just awkward, say so. Comments on readability directly shape how the docs are written and structured.
-- **Methodology**: if you doubt an approach itself, whether the beam schedule, the sampling of unknown futures, the evaluation split, or the tuning loop, question it. Methodology feedback feeds back into the implementation, not just the words.
+- **Methodology**: if you doubt an approach itself, whether the beam schedule, the sampling of unknown futures, or the evaluation split, question it. Methodology feedback feeds back into the implementation, not just the words.
 
 You do not need to be polite or complete: a one-line "I got lost here" on the exact sentence is already useful. Wherever possible, point at the page and the part that tripped you, so improvements land where they matter.

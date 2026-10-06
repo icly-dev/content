@@ -110,5 +110,3 @@ Everything the search evaluated at depth 1 or deeper during move N is still reac
 ## Sizing
 
 Table capacity is a compile-time build option (`TETRIS_TT_BITS`, 15 by default). Each extra bit doubles the entry count, and a larger table makes collisions rarer. Since there is one table per search depth, total memory also grows with the search horizon; the engine reports its exact memory usage, which includes all tables.
-
-The profiler can report the table's hit and replacement rates when built with statistics enabled. A hit rate near 80 percent or above means the search is revisiting boards heavily and the cache is doing its job; a high replacement-to-store ratio means the table keeps overwriting fresh entries, and a larger capacity is worth trying.

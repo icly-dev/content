@@ -68,13 +68,13 @@ The animations below sweep the peak across the full horizon in the settled state
 
 ![Beam limits with spread 1.5 while the peak sweeps across the horizon](../../asset/beam_limits_spread_1.5.gif)
 
-Dividing by branching has a property worth knowing: the total number of candidates evaluated per decision barely changes with the peak and the spread (within 0.1 percent across the full sweep on the measured profile above). That is what lets the parameter tuner compare shape settings at equal work.
+Dividing by branching has a property worth knowing: the total number of candidates evaluated per decision barely changes with the peak and the spread (within 0.1 percent across the full sweep on the measured profile above).
 
 The branching estimates start at 1, so the first deep searches of every game run the pure dome shape before anything has been learned, and the estimates settle within a few searches (each search updates every depth it actually expands). During that warmup the equal-work property does not hold, since there is nothing to divide by; the animation below shows the same sweep before any estimate has been learned:
 
 ![Beam limits during warmup, spread 1.5, before the branching estimates have been learned](../../asset/beam_limits_warmup_spread_1.5.gif)
 
-The two profile knobs (the peak position and the spread) come from the AI's configuration, so tuning the AI also retunes where the search concentrates its work.
+The two profile knobs (the peak position and the spread) come from the AI's configuration, so changing the AI's configuration also changes where the search concentrates its work.
 
 ## Keeping the survivors
 
@@ -89,7 +89,7 @@ def keep(child):
     # otherwise the child is discarded
 ```
 
-Ranking compares candidates by status, with ties broken by generation order: the earlier-generated candidate wins. Both rules together make the search fully deterministic, which matters because matches and tuning experiments must be reproducible.
+Ranking compares candidates by status, with ties broken by generation order: the earlier-generated candidate wins. Both rules together make the search fully deterministic, which matters because matches must be reproducible.
 
 Discarding a candidate is the beam search trade-off, and it is the one place where the search can be wrong: a placement pruned at depth 2 is never reconsidered, even if it would have led somewhere better. The schedule's job is to make that loss unlikely where it matters.
 
@@ -123,4 +123,4 @@ Pre-computing the schedule instead of widening iteratively is what makes the res
 - There is no tracking of partial exploration, no re-expansion across widening passes, and no interaction between the time limit and the beam shape.
 - The transposition table's across-move rotation works on a clean, completed search with a known horizon.
 
-The cost is the loss of anytime behavior: the upstream engine can return a better answer if given more time mid-decision, while haipa commits to the schedule implied by *n* before it looks at the board. The budget must therefore be chosen offline, which is what the profiler and the tuner do.
+The cost is the loss of anytime behavior: the upstream engine can return a better answer if given more time mid-decision, while haipa commits to the schedule implied by *n* before it looks at the board. The budget must therefore be chosen before the game runs.
