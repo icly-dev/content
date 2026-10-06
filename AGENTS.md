@@ -29,6 +29,7 @@ Readers cannot see the code, so pages must stand alone without it.
 
 - Describe the system the way the reader meets it: the stages of a decision, what each takes in and produces, and the guarantees between them. A reader should be able to predict the engine's behavior from the page.
 - Leave out internal detail: data structures, field packing, bit tricks, per-entry flags. "One table per search depth, rotated between moves" is architecture; how a slot packs its hash and result is implementation.
+- Do not explain optional items the engine works without. If an item can vanish with no error and no wrong answer, like the runner's combo table, it gets at most a mention.
 - Pseudocode and diagrams stay at that level too: data flow, not storage layout.
 
 ## Explain rationale, not just mechanics
