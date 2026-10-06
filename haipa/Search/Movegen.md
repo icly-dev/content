@@ -34,7 +34,7 @@ Movegen takes:
 - the movement options the runner declares (for example, whether 180-degree rotations are allowed),
 - the candidate's context: the current stack roof, and whether the placement that produced this board cleared lines.
 
-It reports every reachable landing: a position and orientation, plus an extra tag. The tag is part of the search itself, not of the movement mechanics: the shipped engine grades T-spins with it (none, mini, or full); another search could carry something else. Reports arrive one at a time as movegen finds them, and the search places and scores each landing immediately; movegen runs for every candidate at every depth.
+It reports every reachable landing: a position and orientation, plus an extra tag. The tag is part of the search itself, not of the movement mechanics: the shipped engine grades T-spins with it (none, mini, or full); another search could carry something else. Reports arrive one at a time through a callback as movegen finds them, and the search places and scores each landing immediately; movegen runs for every candidate at every depth.
 
 It never scores anything. Where the piece can go is mechanics; whether that is good is judgment, and judgment lives in the evaluation. Movegen must be fast, find every reachable landing, and stay correct no matter how the evaluation changes.
 
