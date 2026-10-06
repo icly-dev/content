@@ -49,24 +49,7 @@ The results are exact: a position is reported only if the allowed inputs can rea
 
 The checker answers, for any spot: can the piece shift or descend from there, and where does a rotation with its kicks land. Spin grading and [pathgen](<Pathgen>) both ask that checker, so there is one definition of "can move".
 
-haipa decides the inputs (the options, including the restriction below) and interprets the outputs (landings, spin grades). The movement model stays in an independent, benchmarked library; the engine's code stays about policy, not geometry.
-
-## When floating is allowed
-
-By default every option the runner allows goes into the call. One restriction is applied per candidate: when all of these hold, soft drop and sonic drop are switched off, so the piece may only shift and rotate near the top, then hard drop:
-
-- the piece is not the spin piece,
-- the placement that produced this board cleared no lines,
-- the piece spawns entirely above the stack, the normal case (its lowest cell sits above the [roof](<../Engine/Glossary>)).
-
-The rationale is speed. Floating multiplies the reachable positions enormously, most floating placements for a non-spin piece would be discarded by the evaluation anyway, and the call runs for every candidate at every depth. Cutting it where it rarely matters buys a large reduction where it always runs.
-
-The exceptions keep floating where it earns its keep: the spin piece always keeps it, spins are made by descending partway and rotating into a pocket, and it returns when the stack reaches the spawn area or the previous placement cleared lines.
-
-Two consequences:
-
-- Movement options depend on the candidate's history, not only on the board: the clear count travels with the candidate.
-- The restriction shapes only movegen. The [pathgen](<Pathgen>) always has the full option set, so whatever the beam chose can be executed.
+haipa decides the inputs and interprets the outputs (landings, spin grades). The options are per-candidate: usually everything the runner allows, with one speed-driven exception, soft drop and sonic drop are disabled for non-spin pieces unless the stack reaches the spawn area or the previous placement cleared lines. The movement model stays in an independent, benchmarked library; the engine's code stays about policy, not geometry.
 
 ## Spin classification
 
