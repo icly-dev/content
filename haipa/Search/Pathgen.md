@@ -48,7 +48,7 @@ If the decision begins with a hold swap, the hold input comes first. Movement th
 
 ## When there is no path
 
-If no input sequence can reach the winning landing, pathgen returns no path rather than an incorrect route, and the runner proceeds without inputs. This should not happen in normal operation: movegen found the landing through valid movement, and pathgen has at least the same options. The promised spin is the one requirement that could still rule out every route.
+If no input sequence can reach the winning landing, pathgen returns no path rather than an incorrect route. The engine then answers with a plain hard drop instead. This should not happen in normal operation: movegen found the landing through valid movement, and pathgen has at least the same options. The promised spin is the one requirement that could still rule out every route.
 
 ## The inputs the runner receives
 

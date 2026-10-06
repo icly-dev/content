@@ -12,7 +12,7 @@ The Match API runs battles between two thetas and reports the results. All tunin
 |------|---------|
 | Battle | One game between two thetas, played move for move until one dies or the move cap is reached. |
 | Seed pair | Two numbers, one per player. Every randomness source in a battle derives from the player's own seed. |
-| APL | Attack per line: a player's total attack divided by total lines cleared. The skill tiebreak between two survivors. |
+| APL | Attack per line: a player's total attack divided by total lines cleared. The skill tiebreak between two players. |
 
 ## What one battle is
 
@@ -55,7 +55,7 @@ Five settings limit each battle. By default, the move cap is 3600 moves per play
 For each player, a battle reports total attack, total lines cleared, moves played, and whether the player died. Scoring is separate from the battle, so the scoring measure can change without changing the games:
 
 - A death gives the opponent two points.
-- If both players survive, the one with the higher APL gets the point.
+- The player with the higher APL gets one more point.
 - Equal scores count as a tie.
 
 From the first player's perspective, a win scores 1.0, a tie scores 0.5, and a loss scores 0.0.

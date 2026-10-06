@@ -44,9 +44,9 @@ The decision is the best candidate from the deepest completed layer, traced back
 
 The engine returns one of three command strings:
 
-- A **movement path** carries the active piece to the chosen landing, including any spin adjustments. The runner executes the path, and the piece drops.
-- The **hold command** means the search found that swapping in the held piece is better than any placement this turn, so it did not choose a placement.
-- An **empty answer** means there is nothing to do, so the runner proceeds.
+- A **movement path** carries the active piece to the chosen landing, including any spin adjustments. The path may begin with a hold swap when the chosen placement uses the held piece. The runner executes the path, and the piece drops.
+- The **hold command** is the hold input on its own. The engine answers this way only when the hold slot is empty, the known preview is empty, and holding is currently allowed: it swaps the current piece into hold, and the runner's next piece becomes active.
+- A **hard drop** means the engine fell back to the simplest move: the search chose no placement, or the chosen landing had no input path. The piece drops straight down from where it is and locks.
 
 Once the piece lands, the runner calls again with the updated state and the cycle repeats.
 
@@ -55,8 +55,8 @@ Once the piece lands, the runner calls again with the updated state and the cycl
 Each player has a separate engine instance, keyed by player ID, and calls for that player are handled one at a time. Between calls, the instance keeps:
 
 - the transposition tables and predicted board, so previously evaluated positions can be reused when the prediction holds (see [Transposition table](<Transposition Table>)),
-- the learned per-depth branching estimates that shape the beam limit schedule, which reset only when a game restarts,
+- the learned per-depth branching estimates that shape the beam limit schedule,
 - the runner's combo table, cached the first time it is used,
-- the AI's current parameters. The engine checks for changes on the next call and clears all caches if needed.
+- the AI's current parameters. The engine checks for changes on the next call; when the parameters changed, it clears the transposition tables and the branching estimates and forgets the prediction.
 
 With the same game state and random sampling state, a decision is reproducible. The search budget is a count rather than a time limit, and ties are always broken the same way. The engine's random state can also be seeded for repeatable runs.

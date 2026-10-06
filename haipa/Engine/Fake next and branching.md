@@ -34,7 +34,7 @@ The runner sets the fake horizon length and branch count, and passes both to the
 Branches work independently only where needed:
 
 - The search computes one beam limit schedule for the combined horizon, including known placements and the fake tail. Every branch uses the same caps. See [Beam search](<Beam Search>) for details.
-- The search runs through all but the last placement covered by known pieces, then snapshots the frontier for each branch. If hold is enabled and a held piece is available, this shared section extends one placement farther because the swap also places a known piece.
+- The search runs through all but the last placement covered by known pieces, then snapshots the frontier for each branch. If hold is enabled, a held piece is available, and either more than one queue piece is known or holding is currently allowed, this shared section extends one placement farther because the swap also places a known piece.
 - Each branch places the last known piece using its own sampled tail. That can change the preferred paths even before the pieces themselves differ in the next layer. Branches run one at a time in a fixed order.
 - If no pieces are known, there is no shared prefix, so each branch searches from the root.
 - Each branch updates the learned branching estimate for every depth it expands. The fake region is learned like the rest of the search.
