@@ -4,7 +4,7 @@ title: Match API
 
 # Match API
 
-The match API plays battles between two thetas and reports what happened. Everything in tuning is measured with it: the tournament's rating updates and the comparison tool's verdicts both come from battles played here.
+The Match API runs battles between two thetas and reports the results. All tuning measurements use it, including the tournament's rating updates and the comparison tool's verdicts.
 
 ## Glossary
 
@@ -16,15 +16,15 @@ The match API plays battles between two thetas and reports what happened. Everyt
 
 ## What one battle is
 
-Two players take turns, the first player's move then the second player's, for up to the move cap each. On its turn a player asks its engine for one decision and places it. The placement's attack first cancels the player's own pending garbage, oldest packet first; whatever survives is sent to the opponent. A player that clears nothing lets its pending garbage rise into its stack, and dying to the rise ends the battle for that player.
+The two players take turns, first one and then the other, up to the move cap for each player. On its turn, a player asks its engine for a decision and places the piece. The resulting attack first cancels that player's pending garbage, starting with the oldest packet. Any attack left over goes to the opponent. If a player clears no lines, its pending garbage rises into its stack. If that rise causes the player to die, the battle ends for them.
 
-Each player is built from its own seed:
+Each player's randomness comes from its own seed:
 
-- the piece stream draws full bags from one derived stream, so each player sees its own queue,
-- the garbage hole columns come from another derived stream,
-- the engine's sampling seed is derived once more and re-seeded every move with the move count mixed in.
+- The piece stream draws full bags from one derived stream, giving each player a separate queue.
+- Garbage hole columns come from another derived stream.
+- The engine's sampling seed is derived again, then reseeded each move with the move count mixed in.
 
-Every randomness source in a battle is a function of the two seeds, so the same thetas with the same seed pair and the same options replay move for move. Measurements must not flicker, which is why battles are pinned this way.
+All randomness in a battle derives from the two seeds. With the same thetas, seed pair, and options, the battle replays move for move. Pinning the seeds keeps measurements consistent.
 
 ## The battle rules
 
@@ -42,24 +42,24 @@ double or triple, spin       4 or 6
 perfect clear                +6
 ```
 
-A placement that qualifies for back-to-back, a tetris or any spin, adds the current chain depth: one line for most placements, two for a spin triple, and it keeps the chain alive; anything else breaks it. Every clearing placement adds the combo table's value for the running combo count, the same table the runner supplies.
+A tetris or any spin qualifies for back-to-back. It adds the current chain depth, which is one line for most placements and two for a spin triple, and keeps the chain alive. Any other placement breaks the chain. Every placement that clears lines also adds the combo table's value for the current combo count. The runner supplies that table.
 
-Receiving works the other direction: the opponent's surviving attack joins the player's pending packets, and their total is what the engine sees as the incoming attack. A piece that would settle at or above the visible height dies as well.
+On defense, the opponent's remaining attack is added to the player's pending garbage packets. The engine sees their combined total as the incoming attack. A player also dies if a piece would settle at or above the visible height.
 
 ## Options
 
-Five knobs bound a battle, with defaults: the move cap at 3600 moves per player, the search budget at 100, the known preview depth at 6, the fake-piece horizon at 0, and the branch count at 1. They pass straight through to the engine call, so a battle is also a statement about how much work each decision may do.
+Five settings limit each battle. By default, the move cap is 3600 moves per player, the search budget is 100, the known preview depth is 6, the fake-piece horizon is 0, and the branch count is 1. These settings pass directly to the engine, so they also determine how much work each decision can do.
 
 ## Results and scoring
 
-A battle reports per player: total attack, total lines cleared, moves played, and whether the player died. Scoring is deliberately separate from the battle itself, so the measure can change without touching the games:
+For each player, a battle reports total attack, total lines cleared, moves played, and whether the player died. Scoring is separate from the battle, so the scoring measure can change without changing the games:
 
-- a death hands the opponent two points,
-- between two survivors, the higher APL takes the point,
-- equal points tie.
+- A death gives the opponent two points.
+- If both players survive, the one with the higher APL gets the point.
+- Equal scores count as a tie.
 
-The score reads 1.0 for the first player's win, 0.5 for a tie, 0.0 for the loss, always from the first seat.
+From the first player's perspective, a win scores 1.0, a tie scores 0.5, and a loss scores 0.0.
 
 ## Batch, threads and theta files
 
-Battles run one at a time or in a batch with a thread count, since tuning runs thousands of them. A helper also pits a list of candidates against one opponent over a list of seed pairs and returns the mean score per candidate. Thetas move in and out as plain number lists, and as theta files on disk: raw doubles, one per parameter, no header. The shipped defaults can be queried, which is where the search's starting point comes from.
+Battles can run one at a time or in batches with a specified thread count, since tuning may require thousands. A helper can also test a list of candidates against one opponent across a supplied list of seed pairs and return each candidate's mean score. Thetas are passed as lists of numbers or stored in files as raw doubles, one per parameter, with no header. The shipped defaults can be queried and used as the search's starting point.

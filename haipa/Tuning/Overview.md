@@ -4,7 +4,7 @@ title: Overview
 
 # Overview
 
-Tuning is the loop that improves the AI's judgment. The judgment is a list of numbers, the theta: every feature and reward the evaluation weighs carries one, and changing the theta changes what the engine prefers. Tuning searches for a theta that wins more battles than the shipped one.
+Tuning improves the AI's judgment by adjusting the theta, a list of numbers. Each feature and reward in the evaluation has a corresponding value, and changing those values changes what the engine prefers. The goal is to find a theta that wins more battles than the shipped version.
 
 The loop has four parts, each with its own page:
 
@@ -28,4 +28,4 @@ theta candidates -> battles -> Elo ranking -> search step -> better candidates
 
 ## Why battles decide
 
-The evaluation is a long chain of features and rewards, and its quality shows up only in outcomes: which theta survives more battles. No formula maps a theta to a quality score, so tuning measures thetas by playing them and lets a black box search read those measurements. The comparison page then guards the last step, because a win streak is easy to fake with luck and small samples.
+The evaluation combines many features and rewards, and its quality is best judged by outcomes: which theta survives more battles. There is no formula that turns a theta into a quality score, so tuning measures thetas by having them play and gives those results to a black-box search. The comparison page checks the final choice, since luck and small samples can make a candidate look better than it is.

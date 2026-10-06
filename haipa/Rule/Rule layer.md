@@ -4,7 +4,7 @@ title: Rule layer
 
 # Rule layer
 
-The AI has two halves: the judgment, which the engine calls per board and per candidate, and the rule layer, which answers what belongs to the ruleset rather than to judgment. The rule layer is the source of truth for the ruleset: the engine and the judgment adapt to it, never the other way around. The engine asks, the rule layer answers, and the questions come with the game state of the moment, as described in [AI interface](<../AI/AI interface>).
+The AI has two parts: judgment, which scores boards and candidates, and the rule layer, which answers questions about the ruleset. The rule layer is the source of truth. The engine and the judgment adapt to it, not the other way around. Each answer uses the game state at the time of the question, as described in [AI interface](<../AI/AI interface>).
 
 ## Glossary
 
@@ -16,17 +16,17 @@ The AI has two halves: the judgment, which the engine calls per board and per ca
 
 ## The board
 
-The rule layer declares the board type, and that type is the canonical one: the engine adopts it and reads the board's width and height from it instead of fixing its own. The AI's judgment and movegen must use the same board and ruleset types, and the engine checks that at compile time.
+The rule layer declares the board type, which serves as the canonical definition. The engine uses it to get the board's width and height rather than setting its own. The AI's judgment and movegen must use the same board and ruleset types, and the engine checks this at compile time.
 
 In the ruleset this engine ships with, the board is 10 cells wide and 24 rows tall.
 
 ## The ruleset
 
-The ruleset declares the mino types and the rotation system. The shipped ruleset is deliberately simplified: its tetromino set and its SRS rotation system with kicks come from the movement library, [fast-reachability](https://github.com/icly-dev/fast-reachability), rather than from the rule layer. Later rulesets define their own set and system in the rule layer.
+The ruleset declares its mino types and rotation system. The shipped ruleset is deliberately simplified: its tetromino set and SRS rotation system with kicks come from the movement library [fast-reachability](https://github.com/icly-dev/fast-reachability), rather than the rule layer. Later rulesets can define their own piece sets and rotation systems in the rule layer.
 
 ## What the engine asks
 
-Two questions, each tied to a use case:
+The engine asks two questions, each for a different purpose:
 
-- `suggest_spawn`: the absolute entry spot for a piece, the same for every situation. In the shipped ruleset it sits just left of the middle, near the top, unrotated. The AI's spawn call starts from it and adjusts it to what the real game does at the entry.
-- `make_bag`: one shuffled draw of the full mino set, all seven tetrominoes in the shipped ruleset. The engine uses it to refill the fake pieces when the known preview runs out (see [Fake next and branching](<../Engine/Fake next and branching>)).
+- It asks for the absolute entry spot for a piece. This spot is the same in every situation. In the shipped ruleset, it is unrotated and sits near the top, just left of center. The AI starts from this suggestion and adjusts it to match the real game's entry behavior.
+- It asks for a shuffled draw of the full mino set. In the shipped ruleset, that means all seven tetrominoes. The engine uses the draw to refill fake pieces when the known preview runs out (see [Fake next and branching](<../Engine/Fake next and branching>)).
