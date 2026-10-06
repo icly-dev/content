@@ -52,17 +52,16 @@ The shipped AI returns the suggested spawn unchanged: the ruleset it targets adj
 
 The engine calls `eval` once per board it has not seen yet. The evaluation receives:
 
-- the landing that produced the board (see [Movegen](<../Search/Movegen>)),
 - the resulting board, in the engine's row form or in the AI's own board type, whichever the AI provides an evaluation for,
 - the board's roof.
 
-Everything it returns is cached under the board's hash (see [Transposition table](<../Engine/Transposition Table>)), so it must depend on the board and nothing else: two candidates that land different pieces into the same board share one evaluation.
+What it measures is the AI's own business; typical examples are board shape features such as bumpiness and aggregate height. Everything it returns is cached under the board's hash (see [Transposition table](<../Engine/Transposition Table>)), so it must depend on the board and nothing else: two candidates that land different pieces into the same board share one evaluation.
 
 ## The context step
 
 The context step, `get`, runs for every candidate placement. It takes:
 
-- the landing,
+- the landing (see [Movegen](<../Search/Movegen>)),
 - the cached evaluation,
 - the line clears the placement made,
 - the board and its roof,
@@ -70,7 +69,7 @@ The context step, `get`, runs for every candidate placement. It takes:
 - the status carried from the parent node,
 - the environment.
 
-It returns the child's status: the running assessment that ranks candidates and carries the match state, line clears, combo, and back-to-back, forward. The split between the two stages is what makes the evaluation cacheable; the [Transposition table](<../Engine/Transposition Table>) page explains it in full.
+It returns the child's status: the running assessment that ranks candidates and carries the match state, line clears, combo, and back-to-back, forward. The rewards it adds come from the placement's own events, for example a back-to-back chain, a combo, a spin, or how a specific piece such as the I was spent or held for later. The split between the two stages is what makes the evaluation cacheable; the [Transposition table](<../Engine/Transposition Table>) page explains it in full.
 
 When the AI declares priority pieces, the environment also carries how far away each one sits in the known preview.
 
