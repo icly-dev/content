@@ -109,6 +109,10 @@ Discarding a candidate is the beam search trade-off, and it is the one place whe
 
 The search's memory is bounded by construction, and the bound is the schedule itself. A layer never holds more candidates than its beam limit, so the number of live candidates at any moment is at most the sum of the caps across the horizon. Each candidate is a small fixed-size record: the board it produced, its scores, the pieces still to come, and a link to the first placement of its path. No search tree is kept; a pruned candidate is dropped on the spot and can only reappear through another path.
 
+![The search tree with the interior depths covered by an overlay reading unstored nodes](<../../asset/beam_unstored_nodes.png>)
+
+The figure shows what that means across the whole tree: the first layer survives as the answer, the last layer decides which answer wins, and the interior depths between them are never stored. Only the current frontier survives layer by layer; what the interior boards leave behind is at most the evaluations the transposition table happens to keep, which is the retention the table exists for.
+
 The frontier lives in two reusable buffers, one for the current layer and one for the next. Each layer refills the next buffer from scratch and the two then swap, so allocation settles after the first layers and the same storage is reused for the rest of the decision. When the search branches over sampled futures, the shared frontier is copied once per branch, one branch at a time, so peak memory grows by one extra frontier rather than one per branch.
 
 The dominant memory consumers sit outside this loop: the per-depth transposition tables, whose sizing is covered in [Transposition table](<Transposition Table>), plus the bookkeeping that survives between decisions. The engine reports its total footprint, tables included.
