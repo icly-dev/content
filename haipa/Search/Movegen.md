@@ -49,7 +49,7 @@ The results are exact: a position is reported only if the allowed inputs can rea
 
 The checker answers, for any spot: can the piece shift or move down from there, and where does a rotation with its kicks land. Spin grading and [pathgen](<Pathgen>) both ask that checker, so there is one definition of "can move".
 
-haipa decides the inputs and interprets the outputs (landings, spin grades). The options are per-candidate: usually everything the runner allows. One exception exists for speed: soft drop and sonic drop are disabled for non-spin pieces unless the stack reaches the spawn area or the previous placement cleared lines. The movement model stays in an independent, benchmarked library; the engine's code stays about policy, not geometry.
+haipa decides the inputs and interprets the outputs (landings, spin grades). The options are per-candidate: usually everything the runner allows. One exception exists for speed: soft drop and sonic drop are disabled for non-spin pieces unless the stack reaches the spawn area or the previous placement cleared lines. Floating mostly multiplies the spots to report and score, and above the roof it adds none. The movement model stays in an independent, benchmarked library; the engine's code stays about policy, not geometry.
 
 ## Spin classification
 

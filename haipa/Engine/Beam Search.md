@@ -65,7 +65,7 @@ The animations below sweep the peak across the full horizon in the settled state
 
 ![Beam limits with spread 1.5 while the peak sweeps across the horizon](../../asset/beam_limits_spread_1.5.gif)
 
-Dividing by branching has a property worth knowing: the total number of candidates evaluated per decision barely changes with the peak and the spread (within 0.1 percent across the full sweep on the measured profile above). That is what lets the tuner compare shape settings at equal work.
+Dividing by branching has a property worth knowing: the total number of candidates evaluated per decision barely changes with the peak and the spread (within 0.1 percent across the full sweep on the measured profile above). That is what lets the parameter tuner compare shape settings at equal work.
 
 The branching estimates start at 1, so the first deep searches of every game run the pure dome shape before anything has been learned, and the estimates settle within a few searches (each search updates every depth it actually expands). During that warmup the equal-work property does not hold, since there is nothing to divide by; the animation below shows the same sweep before any estimate has been learned:
 
@@ -92,7 +92,7 @@ Discarding a candidate is the beam search trade-off, and it is the one place whe
 
 ## Memory
 
-The search's memory has a hard limit, and the limit is the schedule itself. A layer never holds more candidates than its beam limit, so the number of live candidates at any moment is at most the sum of the caps across the horizon. Each candidate records the board it produced, its scores, the pieces still to come, and a link to the first placement of its path. No search tree is kept; a pruned candidate is dropped on the spot and can only reappear through another path.
+The search's memory has a hard limit, and the limit is the schedule itself. A layer never holds more candidates than its beam limit, so the number of live candidates at any moment is at most the sum of the caps across the horizon. Each candidate records the board it produced, its status, the pieces still to come, and a link to the first placement of its path. No search tree is kept; a pruned candidate is dropped on the spot and can only reappear through another path.
 
 ![The search tree with the interior depths covered by an overlay reading unstored nodes](<../../asset/beam_unstored_nodes.png>)
 
@@ -100,7 +100,7 @@ The figure shows what that means across the whole tree: the first layer survives
 
 Each layer refills the previous layer's storage, so memory use settles after the first layers and nothing grows with the tree. When the search branches over sampled futures, the shared frontier is copied once per branch, one branch at a time, so peak memory grows by one extra frontier rather than one per branch.
 
-Most memory sits outside this loop: the per-depth transposition tables, whose sizing is covered in [Transposition table](<Transposition Table>), plus the state that survives between decisions. The engine reports its total memory use, tables included.
+Most memory sits outside this loop: the per-depth transposition tables, whose sizing is covered in [Transposition table](<Transposition Table>), plus the between-decision state listed on [Overview](<Overview>). The engine reports its total memory use, tables included.
 
 ## Stopping early
 
