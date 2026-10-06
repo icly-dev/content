@@ -28,7 +28,7 @@ The runner calls the engine once per decision, which is normally once per placed
 - the held piece and whether holding is currently allowed, plus whether 180-degree spins are allowed,
 - the known preview, whose length sets how deep the search can look with certainty,
 - the match state: the back-to-back flag, the combo counter, the incoming attack, and the runner's combo table,
-- the search knobs: how deep into the known preview to look, and a level setting that picks the search budget on an exponential scale.
+- the search knobs: how deep into the known preview to look, and how much search work to spend,
 
 Preparation then sets up the search:
 

@@ -105,7 +105,7 @@ depth 2  [ table C ]             depth 2  [ table D ]   was depth 3
 depth 3  [ table D ]  chosen ->  depth 3  [ empty   ]   cleared
 ```
 
-Everything the search evaluated at depth 1 or deeper during move N is still reachable, just one level shallower.
+Everything the search evaluated at depth 1 or deeper during move N is still reachable, just one depth shallower.
 
 ## Sizing
 
