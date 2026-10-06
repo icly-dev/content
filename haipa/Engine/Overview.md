@@ -34,9 +34,9 @@ Preparation then sets up the search:
 
 - the playfield and the active piece's position are loaded,
 - the match state (combo, back-to-back, incoming attack) is loaded into the running status,
-- caches are reconciled: if the AI's parameters changed since the last call, everything cached is dropped; otherwise the transposition tables carry over as described in [Transposition table](<Transposition Table>).
+- caches are brought up to date: if the AI's parameters changed since the last call, everything cached is dropped; otherwise the transposition tables carry over as described in [Transposition table](<Transposition Table>).
 
-The search itself is the [beam search](<Beam Search>): it expands placements depth by depth under a pre-computed beam limit schedule, scores candidates through the cached board evaluations, halts early when the whole beam agrees on the first placement, and branches over [sampled futures](<Fake next and branching>) when the known preview runs out. The raw material comes from the move generator ([movegen](<../Search/Movegen>)), which reports, for every candidate, the spots its piece can reach and which of them are spins.
+The search itself is the [beam search](<Beam Search>): it expands placements depth by depth under a pre-computed beam limit schedule, scores candidates through the cached board evaluations, stops early when the whole beam agrees on the first placement, and branches over [sampled futures](<Fake next and branching>) when the known preview runs out. The raw material comes from the move generator ([movegen](<../Search/Movegen>)), which reports, for every candidate, the spots its piece can reach and which of them are spins.
 
 The decision is the best candidate the deepest completed layer produced, traced back to its first placement: where the active piece should land, or whether a hold swap should happen first. The [path generator](<../Search/Pathgen>) then turns that placement into the command string.
 
@@ -52,11 +52,11 @@ After the piece lands, the runner calls again with the new state, and the cycle 
 
 ## What the engine remembers between calls
 
-Each player gets a separate engine instance, keyed by the player id, and calls for one player are serialized. Between calls the instance keeps:
+Each player gets a separate engine instance, keyed by the player id, and calls for one player are handled one at a time. Between calls the instance keeps:
 
 - the transposition tables and the predicted board, so evaluated positions survive across moves when the prediction holds,
 - the learned per-depth branching estimates that shape the beam limit schedule, reset only when a game restarts,
 - the combo table, cached on first use,
 - the AI's current parameters; a change is detected on the next call and triggers the full cache reset.
 
-Given the same game state and the same random state for sampling, a decision is reproducible: the search budget is a count rather than a clock, and every tie is broken deterministically.
+Given the same game state and the same random state for sampling, a decision is reproducible: the search budget is a count rather than a clock, and every tie is broken the same way every time.

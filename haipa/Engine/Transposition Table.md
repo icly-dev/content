@@ -29,7 +29,7 @@ Every candidate placement considered by the search is reduced to its resulting b
 
 Either way, the engine then combines the evaluation with the placement's own line clears, current depth, and game state to judge the candidate.
 
-So the table caches *board evaluations*, not search subtrees. Two different landing paths that produce the same board share one evaluation. This is exactly the redundancy that dominates the search, since many placements (and many piece orders reached through hold) converge on the same board shape.
+So the table caches *board evaluations*, not search subtrees. Two different landing paths that produce the same board share one evaluation. This is the largest share of the search's redundant work, since many placements (and many piece orders reached through hold) end at the same board shape.
 
 The flow for one candidate, in pseudocode:
 
@@ -42,13 +42,13 @@ def score(placement, depth):
     return apply_context(result, placement)
 ```
 
-The lookup and the potential evaluation are the whole interaction with the table; everything after that is per-candidate bookkeeping. `apply_context` here is just a placeholder for the second stage of the evaluation described in the next section; it is not a function the reader could call.
+The lookup and the potential evaluation are the whole interaction with the table; everything after that is per-candidate work outside the table. `apply_context` here is just a placeholder for the second stage of the evaluation described in the next section; it is not a function the reader could call.
 
 ## Cached versus not cached
 
 The table is the reason the AI's evaluation is split into two stages:
 
-1. A **board-only evaluation**: a pure function of the board (and its roof). It is comparatively expensive but depends on nothing else, which is what makes it cacheable. This is what the table stores.
+1. A **board-only evaluation**: a pure function of the board (and its roof). It costs more than the second stage but depends on nothing else, which is what makes it cacheable. This is what the table stores.
 2. A **context-dependent scoring step**: cheap, runs for every candidate, and never touches the table.
 
 The second stage takes the cached evaluation and folds in everything that a board alone cannot tell you:
@@ -62,15 +62,15 @@ None of that is cached, because none of it is a function of the board; two place
 
 ## Replacement policy
 
-The table has a fixed capacity, while the number of distinct boards a search touches is unbounded, so the table eventually fills and every new entry must displace an old one. Boards whose hashes land in the same bucket compete for the same two slots even when the table is nowhere near full, which is the more common case at default capacity.
+The table has a fixed capacity, and the number of distinct boards a search touches can outgrow it, so the table eventually fills and every new entry must replace an old one. Boards whose hashes land in the same bucket compete for the same two slots even when the table is nowhere near full, which is the more common case at default capacity.
 
-Eviction is always safe. A cached evaluation is a pure function of the board, so throwing one away never changes what the search computes; it only costs one recomputation of the evaluation the next time that board appears. The policy therefore only trades recomputations against hit rate, never correctness. It also does not need to be clever: within a single move the working set is roughly the beam width times the branching factor per depth, entries are written once and read many times, and the tables are rotated or cleared between moves anyway. A minimal per-bucket policy captures almost all of the available reuse.
+Eviction is always safe. A cached evaluation is a pure function of the board, so throwing one away never changes what the search computes; it only costs one recomputation of the evaluation the next time that board appears. The policy therefore only trades recomputations against hit rate, never correctness. It also does not need to be clever: within a single move each depth holds only about beam width times branching factor boards, entries are written once and read many times, and the tables are rotated or cleared between moves anyway. A minimal per-bucket policy gets almost all of the available reuse.
 
 The policy itself is least-recently-used within each bucket. Each bucket keeps a marker naming the slot to evict next, and both a hit and a store move that marker to the other slot, protecting the entry just touched. When a lookup misses and both slots are occupied, the marked slot is the eviction target: within the bucket, the recently touched entry survives and the stale one is replaced.
 
 ## Hashing
 
-The hash covers the board and its roof only, not the piece being placed or the hold state. That is sound because the cached evaluation depends only on the board: candidates that land different pieces into the same board shape legitimately share an evaluation.
+The hash covers the board and its roof only, not the piece being placed or the hold state. That is sound because the cached evaluation depends only on the board: candidates that land different pieces into the same board shape can share an evaluation.
 
 Only occupied rows below the roof contribute. Rows above the roof are always empty, so boards that differ only in unreachable sky hash identically, which avoids spurious distinctions.
 
@@ -80,7 +80,7 @@ The engine does not keep a single table. It keeps one table per depth of the rea
 
 This separation matters for two reasons.
 
-The first is semantic: the hash does not encode the pending piece sequence. Positions at different depths are incomparable states, since they differ in which pieces are still to come; giving each depth its own table prevents a position from shallow preview depth from answering a lookup at a deeper one. Within one depth, entries that collide differ only by their landed piece, which as shown above is benign.
+The first is semantic: the hash does not encode the pending piece sequence. Positions at different depths cannot stand in for each other, since they differ in which pieces are still to come; giving each depth its own table prevents a position from shallow preview depth from answering a lookup at a deeper one. Within one depth, entries that collide differ only by their landed piece, which is harmless, as shown above.
 
 The second is mechanical: it makes the between-moves update cheap. Rotating or clearing the cache after a move (next section) touches one depth's table instead of the whole cache; a single shared table would need a depth tag on every entry and a pass over all of it to clear one depth.
 
@@ -88,7 +88,7 @@ The second is mechanical: it makes the between-moves update cheap. Rotating or c
 
 Between search calls, the engine decides how much of the cache survives:
 
-- If the new board matches what the engine predicted after its previous chosen placement, the real tables are rotated by one depth: the table for depth *d + 1* becomes the table for depth *d*, because everything the previous search evaluated one move ahead is exactly at the current horizon now. The vacated deepest table is cleared.
+- If the new board matches what the engine predicted after its previous chosen placement, the real tables are rotated by one depth: the table for depth *d + 1* becomes the table for depth *d*, because everything the previous search evaluated one move ahead is exactly at the current horizon now. The deepest table is then cleared.
 - If the board does not match the prediction, all real tables are cleared.
 - The fake-piece tables are always cleared, since the sampled future pieces change every move.
 - On a game reset, everything is cleared and the prediction is forgotten.
@@ -109,6 +109,6 @@ Everything the search evaluated at depth 1 or deeper during move N is still reac
 
 ## Sizing
 
-Table capacity is a compile-time build option (`TETRIS_TT_BITS`, 15 by default). Each extra bit doubles the entry count, and a larger table reduces collision pressure. Since there is one table per search depth, total memory scales with the search horizon as well; the engine reports its exact memory usage, which includes all tables.
+Table capacity is a compile-time build option (`TETRIS_TT_BITS`, 15 by default). Each extra bit doubles the entry count, and a larger table makes collisions rarer. Since there is one table per search depth, total memory also grows with the search horizon; the engine reports its exact memory usage, which includes all tables.
 
-The profiler can report the table's hit and replacement rates when built with statistics enabled. A hit rate near 80 percent or above means the search is revisiting boards heavily and the cache is doing its job; a high replacement-to-store ratio means the table is thrashing and a larger capacity is worth trying.
+The profiler can report the table's hit and replacement rates when built with statistics enabled. A hit rate near 80 percent or above means the search is revisiting boards heavily and the cache is doing its job; a high replacement-to-store ratio means the table keeps overwriting fresh entries, and a larger capacity is worth trying.

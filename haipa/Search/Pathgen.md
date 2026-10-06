@@ -36,11 +36,11 @@ Every input adds its frame cost, and the cheapest total time wins; a state reach
 
 ## Reproducing the promised spin
 
-The scored spin grade is a promise: the game only honors it if the executed inputs end with the right rotation. So the spin is part of the movement state, re-derived after every rotation with the same corner and kick rules the [movegen grading pass](<Movegen#spin-classification>) used. A route arriving with the wrong spin does not reach the goal, so the output path ends in a rotation that produces the promised spin, or there is no path.
+The scored spin grade is a promise: the game only honors it if the executed inputs end with the right rotation. So the spin is part of the movement state, recomputed after every rotation with the same corner and kick rules the [movegen grading pass](<Movegen#spin-classification>) used. A route arriving with the wrong spin does not reach the goal, so the output path ends in a rotation that produces the promised spin, or there is no path.
 
 Both layers grade spins with the same rules, so a scored grade is a reproducible grade.
 
-The movement queries underneath, shifts, rotations with kicks, descent, come from the same public library, [fast-reachability](https://github.com/icly-dev/fast-reachability), that [movegen](<Movegen>) is built on.
+The movement queries underneath, shifts, rotations with kicks, moving down, come from the same public library, [fast-reachability](https://github.com/icly-dev/fast-reachability), that [movegen](<Movegen>) is built on.
 
 ## Hold first
 
@@ -48,7 +48,7 @@ When the decision starts with a hold swap, the hold input comes first, and the m
 
 ## When there is no path
 
-If the winning landing cannot be reached by any input sequence, the answer degrades to no path rather than a wrong one, and the runner proceeds without inputs. This should not occur in normal operation: the landing was found through real movement, and pathgen has at least the options that found it.
+If the winning landing cannot be reached by any input sequence, the answer is no path rather than a wrong one, and the runner proceeds without inputs. This should not occur in normal operation: the landing was found through real movement, and pathgen has at least the options that found it.
 
 ## The inputs the runner receives
 

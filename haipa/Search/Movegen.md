@@ -21,7 +21,7 @@ Shared engine vocabulary (board, roof, placement, depth, horizon, hold) is defin
 | Resting | A property of a landing: the piece cannot move further down from that spot. |
 | Tag | An extra value attached to every landing by the search. Its meaning belongs to the search layer, not to the movement mechanics; in the shipped engine it grades T-spins. |
 | Kick | The nudge a ruleset applies when a rotation is blocked; kicks can shift a piece sideways or upward while it rotates. |
-| Floating movement | Inputs that let the piece descend under control: soft drop, one row at a time, and sonic drop, down to the resting spot without locking. Floating is what lets a piece slide under an overhang mid-descent. |
+| Floating movement | Inputs that let the piece move down under control: soft drop, one row at a time, and sonic drop, down to the resting spot without locking. Floating is what lets a piece slide under an overhang while it falls. |
 | Hard drop | Straight down to the resting spot, locking immediately. |
 | Spin | A landing reached by rotating into a tight pocket rather than falling into it. The ruleset this engine ships with rewards these for one piece, the T, and grades them into a full spin and a weaker mini spin. |
 
@@ -34,9 +34,9 @@ Movegen takes:
 - the movement options the runner declares (for example, whether 180-degree rotations are allowed),
 - the candidate's context: the current stack roof, and whether the placement that produced this board cleared lines.
 
-It reports every reachable landing: a position and orientation, plus an auxiliary tag. The tag is part of the search itself, not of the movement mechanics: the shipped engine grades T-spins with it (none, mini, or full); another search could carry something else. Reports arrive one at a time as movegen finds them, and the consumer places and scores each landing immediately; movegen runs for every candidate at every depth.
+It reports every reachable landing: a position and orientation, plus an extra tag. The tag is part of the search itself, not of the movement mechanics: the shipped engine grades T-spins with it (none, mini, or full); another search could carry something else. Reports arrive one at a time as movegen finds them, and the search places and scores each landing immediately; movegen runs for every candidate at every depth.
 
-It never scores anything. Where the piece can go is mechanics; whether that is good is judgment, and judgment lives in the evaluation. Movegen must be fast and exhaustive over mechanics, and stay correct no matter how the evaluation changes.
+It never scores anything. Where the piece can go is mechanics; whether that is good is judgment, and judgment lives in the evaluation. Movegen must be fast, find every reachable landing, and stay correct no matter how the evaluation changes.
 
 ## Built on fast-reachability
 
@@ -45,11 +45,11 @@ Movegen is a thin layer over a separate, public movement library, [fast-reachabi
 - in: the board, the spawn position and orientation, and the allowed options,
 - out: the positions each orientation of the piece can reach, plus a movement checker built from that same call.
 
-The results are exact: a position is reported only if the allowed inputs can reach it, and every reachable position is reported. The cells the piece cannot move down from are the landings, and movegen enumerates them and streams them out as described above.
+The results are exact: a position is reported only if the allowed inputs can reach it, and every reachable position is reported. The cells the piece cannot move down from are the landings, and movegen reports each one as described above.
 
-The checker answers, for any spot: can the piece shift or descend from there, and where does a rotation with its kicks land. Spin grading and [pathgen](<Pathgen>) both ask that checker, so there is one definition of "can move".
+The checker answers, for any spot: can the piece shift or move down from there, and where does a rotation with its kicks land. Spin grading and [pathgen](<Pathgen>) both ask that checker, so there is one definition of "can move".
 
-haipa decides the inputs and interprets the outputs (landings, spin grades). The options are per-candidate: usually everything the runner allows, with one speed-driven exception, soft drop and sonic drop are disabled for non-spin pieces unless the stack reaches the spawn area or the previous placement cleared lines. The movement model stays in an independent, benchmarked library; the engine's code stays about policy, not geometry.
+haipa decides the inputs and interprets the outputs (landings, spin grades). The options are per-candidate: usually everything the runner allows. One exception exists for speed: soft drop and sonic drop are disabled for non-spin pieces unless the stack reaches the spawn area or the previous placement cleared lines. The movement model stays in an independent, benchmarked library; the engine's code stays about policy, not geometry.
 
 ## Spin classification
 
@@ -60,11 +60,11 @@ Spin detection runs over the landings of the spin piece only, as a grading pass 
 3. **Front corners decide the grade.** Both corners on the side the piece points toward occupied means full.
 4. **The kick test confirms the rest.** The corner rule alone can mislabel a slot the piece merely fell into, so the weaker cases must rotate out of the spot and back into exactly the same spot. The kick size on the way separates the strongest twist, which also counts as full, from a mini.
 
-One placement can be delivered more than once: different kick sequences can reach the same spot with different strengths, so it is reported once per grade, for example no spin, mini, and full. The consumer evaluates each report as its own candidate, and the ruleset scores the variants differently, which is what lets the search prefer a full spin over a mini at the same spot.
+One placement can be delivered more than once: different kick sequences can reach the same spot with different strengths, so it is reported once per grade, for example no spin, mini, and full. The search evaluates each report as its own candidate, and the ruleset scores the variants differently, which is what lets it prefer a full spin over a mini at the same spot.
 
 ## What it costs and where it runs
 
-Movegen runs for every candidate the beam expands, once per piece choice: the current piece, plus the held piece when holding is available. It is the engine's hot path: the profiler's timing summary reports it as its own stage, named `search`.
+Movegen runs for every candidate the beam expands, once per piece choice: the current piece, plus the held piece when holding is available. It is the engine's busiest work: the profiler's timing summary reports it as its own stage, named `search`.
 
 ## What the beam search does with landings
 

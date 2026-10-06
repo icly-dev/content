@@ -15,7 +15,7 @@ Shared engine vocabulary (board, depth, horizon, hold, status, search budget) is
 | Fake horizon | How many placements deep the search goes on fake pieces. |
 | Branch | One independently sampled continuation of the search past the known preview. |
 | Branch count | How many futures are sampled per decision. |
-| Vote | A branch's endorsement of one first move for the current piece. |
+| Vote | The first move a branch's own search ends on. |
 
 ## Why fake pieces exist
 
@@ -25,7 +25,7 @@ Trusting a single guess would bias the search: a continuation that happens to su
 
 ## How the fake pieces are sampled
 
-Each branch draws its tail without replacement from a shuffled bag, refilling a fresh shuffled bag when one runs out, so a tail respects the same bag invariant the game's real queue does. Different branches draw independently, so two branches rarely agree on the whole tail. Sampling consumes the engine's random state, which keeps every decision reproducible for a given seed.
+Each branch draws its tail without replacement from a shuffled bag, refilling a fresh shuffled bag when one runs out, so a tail follows the same bag rule the game's real queue does. Different branches draw independently, so two branches rarely agree on the whole tail. Sampling uses up the engine's random state, which keeps every decision reproducible for a given seed.
 
 The fake horizon length and the branch count are runner-side knobs: the profiler exposes them as flags, and the search API takes both as parameters. With a fake horizon but a branch count of one, a single sampled future is still used, which is the cheapest configuration that still looks past the preview.
 
@@ -41,7 +41,7 @@ Branches are independent only where they must be:
 
 ## Voting
 
-Each branch ends with one winning first move: the best candidate its own search found, traced back to its first placement. Votes are tallied per first move, where a first move is identified by its landing position and whether it was a hold swap, and each tally also remembers the best status any branch achieved with it.
+Each branch ends with one winning first move: the best candidate its own search found, traced back to its first placement. Votes are counted per first move, where a first move is identified by its landing position and whether it was a hold swap, and each count also remembers the best status any branch achieved with it.
 
 The most-voted first move wins. Ties go to the move with the better status, then to the earlier-generated one. If no branch produces a move, the engine falls back to requesting a hold when the branches asked for one.
 
