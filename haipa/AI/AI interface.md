@@ -69,7 +69,7 @@ The context step, `get`, runs for every candidate placement. It takes:
 - the status carried from the parent node,
 - the environment.
 
-It returns the child's status: the running assessment that ranks candidates and carries the match state, line clears, combo, and back-to-back, forward. The rewards it adds come from the placement's own events, for example a back-to-back chain, a combo, a spin, or how a specific piece such as the I was spent or held for later. The split between the two stages is what makes the evaluation cacheable; the [Transposition table](<../Engine/Transposition Table>) page explains it in full.
+It returns the child's status: the running assessment that ranks candidates and carries the match state, line clears, combo, and back-to-back, forward. The rewards it adds come from the placement's own events, for example a back-to-back chain, a combo, a spin, or how a specific piece such as the I was spent or held for later. These examples are what the inputs permit judging; which of them a specific AI actually computes is its own, and the docs stop there. The split between the two stages is what makes the evaluation cacheable; the [Transposition table](<../Engine/Transposition Table>) page explains it in full.
 
 When the AI declares a fixed list of priority pieces, the environment also carries, for each one, how many pieces away it sits in the known preview.
 
