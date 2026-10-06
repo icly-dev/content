@@ -6,7 +6,7 @@ title: Welcome
 
 This site is built from markdown files in a git repo, rendered by a small SvelteKit app. Pages live under `content/` and are mirrored to URLs, the directory tree on the left is generated from the repo layout, and every page accepts comments: sign in with GitHub or Discord to leave one.
 
-The haipa documentation currently covers the engine, the movement layers beneath it, and the AI it calls into:
+The haipa documentation currently covers the engine, the movement layers beneath it, the AI it calls into, and the tuning loop around it:
 
 - [Overview](haipa/Engine/Overview) for the input-to-decision flow,
 - [Glossary](haipa/Engine/Glossary) for shared vocabulary,
@@ -17,6 +17,11 @@ The haipa documentation currently covers the engine, the movement layers beneath
 - [Rule layer](<haipa/Rule/Rule layer>) for the ruleset side of the AI: the board, the mino types, the rotation system, and the two questions the engine asks,
 - [Movegen](<haipa/Search/Movegen>) for how the engine finds every move a piece can make,
 - [Pathgen](<haipa/Search/Pathgen>) for how the chosen move becomes the inputs the runner executes.
+- [Tuning Overview](<haipa/Tuning/Overview>) for the loop that improves the AI's judgment,
+- [Match API](<haipa/Tuning/Match API>) for the battle two thetas play and how a result becomes a score,
+- [Matchmaking](<haipa/Tuning/Matchmaking>) for the Elo tournament that ranks a generation's candidates,
+- [CMA-ES](<haipa/Tuning/CMA-ES>) for the black box search over the theta,
+- [Theta comparison](<haipa/Tuning/Theta comparison>) for settling whether one theta really beats another.
 
 ## Feedback wanted
 
