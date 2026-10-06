@@ -59,4 +59,4 @@ Each player gets a separate engine instance, keyed by the player id, and calls f
 - the runner's combo table, cached on first use,
 - the AI's current parameters; a change is detected on the next call and triggers the full cache reset.
 
-Given the same game state and the same random state for sampling, a decision is reproducible: the search budget is a count rather than a clock, and every tie is broken the same way every time.
+Given the same game state and the same random state for sampling, a decision is reproducible: the search budget is a count rather than a clock, and every tie is broken the same way every time. The engine's random state can be seeded for reproducible runs.
