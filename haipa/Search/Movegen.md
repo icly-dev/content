@@ -1,13 +1,13 @@
 ---
-title: Landings
+title: Movegen
 ---
 
-# Landings
+# Movegen
 
-The [beam search](<../Engine/Beam Search>) decides which placement wins, but it never looks for placements: every candidate is handed the list of placements its piece can make. Producing that list is the landing search, the lowest layer of the engine. Given a board and a piece at its spawn, it reports every spot where the piece can come to rest, and marks which of those spots are spins. The [path search](<Movement paths>) then turns whichever spot wins into inputs.
+The [beam search](<../Engine/Beam Search>) decides which placement wins, but it never looks for placements: every candidate is handed the moves its piece can make. Producing them is move generation, usually shortened to movegen, the lowest layer of the engine. Given a board and a piece at its spawn, it reports every spot where the piece can come to rest, and marks which of those spots are spins. The [pathgen](<Pathgen>) then turns whichever spot wins into inputs.
 
 ```text
-game state -> beam search -> landing sweep (every candidate) -> path search (winner only) -> command string
+game state -> beam search -> movegen (every candidate) -> pathgen (winner only) -> command string
 ```
 
 ## Glossary
@@ -28,20 +28,20 @@ Shared engine vocabulary (board, roof, placement, depth, horizon, hold) is defin
 
 ## The contract
 
-The landing search takes:
+Movegen takes:
 
 - the board,
 - the piece and its spawn position and orientation,
 - the movement options the runner declares (for example, whether 180-degree rotations are allowed),
 - the candidate's context: the current stack roof, and whether the placement that produced this board cleared lines.
 
-It reports every reachable landing: a position and orientation, plus an auxiliary tag carried alongside. The tag is part of the search itself, not of the movement mechanics: its meaning is owned by the layer above, and the shipped engine uses it to grade T-spins (none, mini, or full); a different search could carry something else entirely. The reports arrive one at a time through a callback as the sweep finds them, not as a collected list: the consumer places and scores each landing immediately and discards what it does not want. Since the sweep runs for every candidate at every depth, this streaming form keeps the hot path free of per-candidate allocation, and memory stays flat no matter how many landings a piece has; returning the same information would require a growable result list on every call.
+It reports every reachable landing: a position and orientation, plus an auxiliary tag carried alongside. The tag is part of the search itself, not of the movement mechanics: its meaning is owned by the layer above, and the shipped engine uses it to grade T-spins (none, mini, or full); a different search could carry something else entirely. The reports arrive one at a time through a callback as the sweep finds them, not as a collected list: the consumer places and scores each landing immediately and discards what it does not want. Since movegen runs for every candidate at every depth, this streaming form keeps the hot path free of per-candidate allocation, and memory stays flat no matter how many landings a piece has; returning the same information would require a growable result list on every call.
 
-It never scores anything. Where the piece can go is mechanics; whether going there is good is judgment, and judgment lives entirely in the AI's evaluation. This split is deliberate: the landing search must be fast and exhaustive over mechanics, and it must stay correct no matter how the evaluation changes.
+It never scores anything. Where the piece can go is mechanics; whether going there is good is judgment, and judgment lives entirely in the AI's evaluation. This split is deliberate: movegen must be fast and exhaustive over mechanics, and it must stay correct no matter how the evaluation changes.
 
 ## One sweep per piece
 
-The sweep does not walk positions one by one. For each orientation of the piece it keeps one bitboard: every cell where that orientation currently fits. One operation advances the whole set at once:
+The core of movegen is a sweep, and the sweep does not walk positions one by one. For each orientation of the piece it keeps one bitboard: every cell where that orientation currently fits. One operation advances the whole set at once:
 
 - shift the entire set one cell left or right, minus wherever that would overlap,
 - rotate the entire set into the neighboring orientation, applying the ruleset's kick tables cell by cell,
@@ -71,7 +71,7 @@ The exceptions keep floating exactly where it earns its keep: the spin piece alw
 Two consequences are worth stating plainly:
 
 - The movement options depend on the candidate's history (the clear count travels with it), not only on the board. Two candidates on similar boards can face different movement rules.
-- The restriction shapes only the landing sweep. The [path search](<Movement paths>) always has the full option set, so whatever the beam chose can be executed.
+- The restriction shapes only movegen. The [pathgen](<Pathgen>) always has the full option set, so whatever the beam chose can be executed.
 
 ## Spin classification
 
@@ -88,7 +88,7 @@ One placement can be delivered more than once: different kick sequences can reac
 
 ## What it costs and where it runs
 
-The sweep runs for every candidate the beam expands, once per piece choice (the current piece, and the held piece when holding is available). It is the engine's hot path: the profiler's timing summary reports it as its own stage, named `search`, so a profile says directly how much of a decision's time went into movement.
+Movegen runs for every candidate the beam expands, once per piece choice (the current piece, and the held piece when holding is available). It is the engine's hot path: the profiler's timing summary reports it as its own stage, named `search`, so a profile says directly how much of a decision's time went into movement.
 
 ## What the beam search does with landings
 

@@ -13,8 +13,8 @@ The haipa documentation currently covers the engine and the movement layers bene
 - [Beam search](<haipa/Engine/Beam Search>),
 - [Transposition table](<haipa/Engine/Transposition Table>),
 - [Fake next and branching](<haipa/Engine/Fake next and branching>),
-- [Landings](<haipa/Search/Landings>) for how the engine finds every placement a piece can make,
-- [Movement paths](<haipa/Search/Movement paths>) for how the chosen placement becomes the inputs the runner executes.
+- [Movegen](<haipa/Search/Movegen>) for how the engine finds every move a piece can make,
+- [Pathgen](<haipa/Search/Pathgen>) for how the chosen move becomes the inputs the runner executes.
 
 ## Feedback wanted
 

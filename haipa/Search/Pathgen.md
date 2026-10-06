@@ -1,16 +1,16 @@
 ---
-title: Movement paths
+title: Pathgen
 ---
 
-# Movement paths
+# Pathgen
 
-The [beam search](<../Engine/Beam Search>) ends with one winning [landing](<Landings>): a position, an orientation, and the tag the landing search attaches to it (the spin grade, in the shipped engine). The runner cannot act on that directly; it executes inputs. The path search is the last layer of the engine, and it runs once per decision: it turns the chosen landing into the string of inputs the runner performs.
+The [beam search](<../Engine/Beam Search>) ends with one winning [landing](<Movegen>): a position, an orientation, and the tag movegen attaches to it (the spin grade, in the shipped engine). The runner cannot act on that directly; it executes inputs. Turning the chosen landing into that string is path generation, usually shortened to pathgen, and it runs once per decision.
 
-Everything before this layer runs thousands of times per decision and must be cheap. This layer runs once and must be exact.
+Everything before this layer runs thousands of times per decision and must be cheap. Pathgen runs once and must be exact.
 
 ## Glossary
 
-Shared engine vocabulary is defined in the [Glossary](<../Engine/Glossary>), and landing-specific terms in [Landings](<Landings>). This page adds:
+Shared engine vocabulary is defined in the [Glossary](<../Engine/Glossary>), and landing-specific terms in [Movegen](<Movegen>). This page adds:
 
 | Term | Meaning |
 |------|---------|
@@ -20,13 +20,13 @@ Shared engine vocabulary is defined in the [Glossary](<../Engine/Glossary>), and
 
 ## The contract
 
-The path search takes the winning landing, the piece's current position and orientation (or, when the decision starts with a hold swap, the swapped-in piece's spawn), the board, and the movement options the runner declares. It returns the input path, or nothing.
+Pathgen takes the winning landing, the piece's current position and orientation (or, when the decision starts with a hold swap, the swapped-in piece's spawn), the board, and the movement options the runner declares. It returns the input path, or nothing.
 
-It always has the full option set, regardless of the landing sweep's speed restriction: the landing exists on the board, so any real route to it is valid, and a shorter route through floating movement may be used even for a piece whose landings were enumerated without floating.
+It always has the full option set, regardless of movegen's speed restriction: the landing exists on the board, so any real route to it is valid, and a shorter route through floating movement may be used even for a piece whose landings were enumerated without floating.
 
 ## Searching for the fastest inputs
 
-The path search is a shortest-path search over movement states. A state is the piece's position, its true orientation, and the spin collected so far. From each state the possible moves are the runner's inputs:
+Pathgen runs a shortest-path search over movement states. A state is the piece's position, its true orientation, and the spin collected so far. From each state the possible moves are the runner's inputs:
 
 - shift one cell left or right, or a held shift that slides until something blocks,
 - rotate, clockwise, counterclockwise, and 180 degrees when allowed, with the ruleset's kick tables applied,
@@ -36,7 +36,7 @@ Every input adds its frame cost, and the search prefers the cheapest total time,
 
 ## Reproducing the promised spin
 
-The spin grade the beam scored is a promise, and the game will only honor it if the executed inputs actually end with the right rotation. So the spin is part of the movement state: after every rotation along the path it is re-derived from the board with the same corner and kick rules the [landing sweep](<Landings#spin-classification>) used, and a route that arrives with the wrong spin does not count as reaching the goal. The output path therefore ends in a rotation that produces the promised spin, or there is no path at all.
+The spin grade the beam scored is a promise, and the game will only honor it if the executed inputs actually end with the right rotation. So the spin is part of the movement state: after every rotation along the path it is re-derived from the board with the same corner and kick rules the [movegen sweep](<Movegen#spin-classification>) used, and a route that arrives with the wrong spin does not count as reaching the goal. The output path therefore ends in a rotation that produces the promised spin, or there is no path at all.
 
 This is also what keeps the two layers consistent: both grade spins with the same rules, so a grade that was scored is a grade the runner can reproduce.
 
@@ -46,7 +46,7 @@ When the decision starts with a hold swap, the hold input is prepended and the m
 
 ## When there is no path
 
-If the winning landing cannot be reached by any input sequence, the answer degrades to no movement path rather than a wrong one, and the runner simply proceeds without inputs. Under normal operation this does not occur: the landing was found through real movement, and the path search has at least the options that found it.
+If the winning landing cannot be reached by any input sequence, the answer degrades to no movement path rather than a wrong one, and the runner simply proceeds without inputs. Under normal operation this does not occur: the landing was found through real movement, and pathgen has at least the options that found it.
 
 ## The inputs the runner receives
 
