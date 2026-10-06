@@ -6,13 +6,15 @@ title: Welcome
 
 This site is built from markdown files in a git repo, rendered by a small SvelteKit app. Pages live under `content/` and are mirrored to URLs, the directory tree on the left is generated from the repo layout, and every page accepts comments: sign in with GitHub or Discord to leave one.
 
-The haipa documentation currently covers the engine and the movement layers beneath it:
+The haipa documentation currently covers the engine, the movement layers beneath it, and the AI it calls into:
 
 - [Overview](haipa/Engine/Overview) for the input-to-decision flow,
 - [Glossary](haipa/Engine/Glossary) for shared vocabulary,
 - [Beam search](<haipa/Engine/Beam Search>),
 - [Transposition table](<haipa/Engine/Transposition Table>),
 - [Fake next and branching](<haipa/Engine/Fake next and branching>),
+- [AI interface](<haipa/AI/AI interface>) for the calls the engine makes into the AI: where a piece enters, the board-only evaluation, and the context step,
+- [Rule layer](<haipa/Rule/Rule layer>) for the ruleset side of the AI: the board, the mino types, the rotation system, and the two questions the engine asks,
 - [Movegen](<haipa/Search/Movegen>) for how the engine finds every move a piece can make,
 - [Pathgen](<haipa/Search/Pathgen>) for how the chosen move becomes the inputs the runner executes.
 
