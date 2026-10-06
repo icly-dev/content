@@ -34,7 +34,7 @@ The landing search takes:
 - the movement options the runner declares (for example, whether 180-degree rotations are allowed),
 - the candidate's context: the current stack roof, and whether the placement that produced this board cleared lines.
 
-It returns every reachable landing, each labeled with a spin type: none, mini, or full.
+It reports every reachable landing, each labeled with a spin type: none, mini, or full. The reports arrive one at a time through a callback as the sweep finds them, not as a collected list: the consumer places and scores each landing immediately and discards what it does not want. Since the sweep runs for every candidate at every depth, this streaming form keeps the hot path free of per-candidate allocation, and memory stays flat no matter how many landings a piece has; returning the same information would require a growable result list on every call.
 
 It never scores anything. Where the piece can go is mechanics; whether going there is good is judgment, and judgment lives entirely in the AI's evaluation. This split is deliberate: the landing search must be fast and exhaustive over mechanics, and it must stay correct no matter how the evaluation changes.
 
@@ -83,7 +83,7 @@ The classification proceeds in steps:
 3. **Front corners decide the grade.** The two corners on the side the piece points toward separate a full spin from a weaker one: both occupied means full.
 4. **The kick test confirms the rest.** The corner rule alone can mislabel a slot the piece merely fell into, so in the weaker cases the sweep verifies that the piece can rotate out of the spot and back into exactly the same spot. Only then is a spin label applied, and the size of the kick used on the way distinguishes the strongest twist, which also counts as full, from a mini.
 
-One placement can be reported more than once. The caller receives a landing once per label that applies to it, so the same spot can arrive up to three times: for example once as a plain landing with no spin, once as a mini spin, and once as a full spin, when different kick sequences reach the same resting spot with different strengths. Each report is evaluated as its own candidate, because the ruleset scores the variants differently, and the beam layer treats them as distinct placements.
+One placement can be delivered more than once: different kick sequences can reach the same resting spot with different strengths, and the spot is then reported once per applicable label, for example once with no spin, once as a mini, and once as a full. The callback form is what makes this natural: repeated delivery of one spot is just more calls, with no list to grow and no special case at the consumer, which evaluates each report as its own candidate. The ruleset scores the variants differently, so treating them separately is what lets the search prefer a full spin over a mini at the same spot.
 
 ## What it costs and where it runs
 
