@@ -64,7 +64,7 @@ One placement can be delivered more than once: different kick sequences can reac
 
 ## What it costs and where it runs
 
-Movegen runs for every candidate the beam expands, once per piece choice: the current piece, plus the held piece when holding is available. It is the engine's busiest work: the profiler's timing summary reports it as its own stage, named `search`.
+Movegen runs for every candidate the beam expands, once per piece choice: the current piece, plus the held piece when holding is available. The profiler's timing summary reports it as its own stage, named `search`, alongside the evaluation's stages, `eval` and `get`.
 
 ## What the beam search does with landings
 
