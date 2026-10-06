@@ -15,5 +15,5 @@ Terms used across the engine documentation. Feature pages link here for shared v
 | Depth | How many pieces into the future a position is. Depth 0 is the current move. |
 | Horizon | The furthest depth the search looks ahead. The *real* horizon uses the actually queued pieces; the *fake* horizon extends beyond it with randomly sampled pieces. |
 | Hold | The one-piece stash a player can swap the current piece into. |
-| Status | The AI's running assessment of a search path: the evaluation of the board plus context gathered along the way, such as line clears, combo, and back-to-back. Statuses are ordered, so one path can be called better than another. |
-| Search budget | How much work one search decision may do, counted as a number of iterations rather than time, which keeps searches reproducible. |
+| Status | The AI's running assessment of a search path: the board's evaluation plus the context gathered along the way, such as line clears, combo, and back-to-back, carried together as one comparable value. |
+| Search budget | The size of one search decision: a count that sizes the beam rather than a clock, which keeps searches reproducible. |

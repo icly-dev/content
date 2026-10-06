@@ -72,17 +72,17 @@ The policy itself is least-recently-used within each bucket. Each bucket keeps a
 
 The hash covers the board and its roof only, not the piece being placed or the hold state. That is sound because the cached evaluation depends only on the board: candidates that land different pieces into the same board shape can share an evaluation.
 
-Only occupied rows below the roof contribute. Rows above the roof are always empty, so boards that differ only in unreachable sky hash identically, which avoids spurious distinctions.
+Only occupied rows below the roof contribute. The search never produces a board with occupied cells above its roof, so nothing distinguishable is lost by leaving the rest of the rows out.
 
 ## One table per search depth
 
-The engine does not keep a single table. It keeps one table per depth of the real piece horizon, plus a separate set of tables for the sampled fake-piece horizon used when playing out unknown future pieces.
+The engine does not keep a single table. It keeps one table per depth of the real piece horizon, plus one table per depth of the sampled fake-piece horizon used when playing out unknown future pieces.
 
 This separation matters for two reasons.
 
-The first is semantic: the hash does not encode the pending piece sequence. Positions at different depths cannot stand in for each other, since they differ in which pieces are still to come; giving each depth its own table prevents a position from shallow preview depth from answering a lookup at a deeper one. Within one depth, entries that collide differ only by their landed piece, which is harmless, as shown above.
+The first is mechanical: it makes the between-moves update cheap. Rotating or clearing the cache after a move (next section) touches one depth's table instead of the whole cache; a single shared table would need a depth tag on every entry and a pass over all of it to refresh one depth.
 
-The second is mechanical: it makes the between-moves update cheap. Rotating or clearing the cache after a move (next section) touches one depth's table instead of the whole cache; a single shared table would need a depth tag on every entry and a pass over all of it to clear one depth.
+The second is about lifetime: the fake tables are cleared on every move while the real ones rotate, and keeping them apart stops the fake-heavy work from evicting real evaluations. Since the cached value depends only on the board, sharing one table across depths would never return a wrong answer; what the separation decides is what survives a move, not what a lookup may return. Within one depth, two candidates that reach the same board share the entry whatever piece landed, and two boards that merely share a bucket cost an eviction, never a wrong answer.
 
 ## Lifetime across moves
 

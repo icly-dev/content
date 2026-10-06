@@ -13,10 +13,11 @@ Shared engine vocabulary (board, roof, placement, evaluation, depth, horizon, ho
 | Breadth-first search (BFS) | Exploring a search tree one depth at a time: every position at depth *d* is expanded before any position at depth *d + 1*. |
 | Beam search | A breadth-first search that cannot afford every position, so each depth keeps only a fixed number of survivors, the beam, and discards the rest. |
 | Beam limit | The number of survivors allowed at one depth. Here it is a per-depth schedule computed before the search starts. |
+| Search width | The beam size the iteration budget translates into; the first layer's cap and the deeper layers' budget scale from it. |
 | Frontier | The set of survivors at the depth currently being expanded. |
 | Candidate | One placement along one path: the board it produces, its status, and a link back to the first placement of its path. |
 | Iterative widening | Growing the beam gradually: start narrow, keep widening as long as budget remains, and stop when the budget runs out. The upstream engine haipa is based on works this way. |
-| Branching factor | How many children an average position produces, that is, how many placements survive from one board. |
+| Branching factor | How many children an average kept position produces, counted as the placements scored from it. |
 | Learned branching estimate | A running average of the observed branching factor at each depth, carried between moves and used to balance the schedule. |
 | Tie-break | The rule that decides between equally good candidates. Here it is generation order, which makes the whole search deterministic. |
 
@@ -47,6 +48,8 @@ def search(board, horizon, limits):
     return best.first_move
 ```
 
+The branch split over sampled futures sits outside this loop: it runs once per branch, continuing from a shared frontier (see [Fake next and branching](<Fake next and branching>)).
+
 Each surviving candidate remembers the *first* placement of its path (including whether it was a hold swap), so no matter how deep the search goes, the answer is always one concrete move for the current piece.
 
 Every child is scored when it is generated. Scoring itself is where the [transposition table](<Transposition Table>) lives: the board evaluation is cached, and the context-dependent part of the status is applied per candidate.
@@ -56,7 +59,7 @@ Every child is scored when it is generated. Scoring itself is where the [transpo
 The schedule is the heart of the design. Given the iteration budget *n* and the horizon, it decides how many survivors each depth may keep. Three ingredients shape it:
 
 1. **A total budget.** The first layer of placements is capped at twice the search width, a size that follows from the iteration budget; the remaining budget across the deeper layers scales with the same width times the horizon. The first layer sits outside the profile on purpose. It holds every legal placement of the current piece, about 34 in the shipped ruleset, all of them cheap to evaluate and all of them directly relevant, since one of them is the move the engine will actually play. The cap is set high enough to never bind, so no real move is discarded before it has been judged, and the Gaussian profile only decides how the much larger deeper layers share the rest of the budget.
-2. **A Gaussian depth profile.** The budget is not spread evenly. Its distribution across depths follows a Gaussian centered at a configurable fraction of the horizon, with a configurable spread and a floor of 5 percent: depths near the center of the horizon keep most of the survivors, and both ends get little on purpose. Early depths matter little because they are cheap to redo, and the last depths matter little because there is no time left to use what they found.
+2. **A Gaussian depth profile.** The budget is not spread evenly. Its distribution across depths follows a Gaussian centered at a configurable fraction of the horizon, with a configurable spread and a floor of 5 percent of the dome's peak: depths near the center of the horizon keep most of the survivors, and both ends get little on purpose. Early depths matter little because they are cheap to redo, their boards' evaluations already sitting in the transposition table, and the last depths matter little because there is no time left to use what they found.
 3. **Branching-factor balancing.** The dome shapes the *evaluation work* of each depth, not the survivor count directly. The engine keeps a learned branching estimate, a running average of how many children each depth actually produced in past searches, and divides each depth's share by it: a depth that branches harder gets a smaller survivor cap, so that the number of scored children per depth follows the dome. Survivor counts therefore move opposite to branching, and the cap sequence is on purpose not smooth even when the dome is. The estimates reset when a new game starts.
 
 The animations below sweep the peak across the full horizon in the settled state (horizon 7, iteration budget 200, and the per-depth branching estimates settled at the values measured from the engine: 68.0, 51.0, 68.7, 54.2, 33.1, 49.5, and 27.0 children per kept node at depths 1 through 6). Solid is what actually exists and enters the beam, the outline is the cap, and the blue bar is the fixed first-layer cap, which at this budget exceeds the roughly 34 possible first placements and never binds. With a narrow spread the bump is one or two depths wide; with a wider spread the survivors cover most of the horizon, while survivor counts still move opposite to branching in both:
@@ -98,7 +101,7 @@ The search's memory has a hard limit, and the limit is the schedule itself. A la
 
 The figure shows what that means across the whole tree: the first layer survives as the answer, the last layer decides which answer wins, and the interior depths between them are never stored. Only the current frontier survives layer by layer; what the interior boards leave behind is at most the evaluations the transposition table happens to keep.
 
-Each layer refills the previous layer's storage, so memory use settles after the first layers and nothing grows with the tree. When the search branches over sampled futures, the shared frontier is copied once per branch, one branch at a time, so peak memory grows by one extra frontier rather than one per branch.
+Each layer refills the previous layer's storage, so memory use settles after the first layers and nothing grows with the tree. Branches run one at a time, each copying the shared frontier for its own pass, so peak memory grows by one extra frontier rather than one per branch.
 
 Most memory sits outside this loop: the per-depth transposition tables, whose sizing is covered in [Transposition table](<Transposition Table>), plus the between-decision state listed on [Overview](<Overview>). The engine reports its total memory use, tables included.
 

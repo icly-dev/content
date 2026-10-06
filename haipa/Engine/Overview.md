@@ -23,12 +23,12 @@ game state -> prepare -> search -> decide -> command string
 
 The runner calls the engine once per decision, which is normally once per placed piece. The call carries the full game state:
 
-- the playfield, 10 cells wide and 22 rows tall, plus one row above it for incoming garbage,
+- the playfield, 10 cells wide and 22 rows tall, plus one row above it for incoming garbage (the engine's internal board is taller still; the rule layer declares it),
 - the active piece with its position and rotation, in the runner's coordinates,
 - the held piece and whether holding is currently allowed, plus whether 180-degree spins are allowed,
 - the known preview, whose length sets how deep the search can look with certainty,
-- the match state: the back-to-back flag, the combo counter, the incoming attack, and the combo table,
-- the search knobs: the preview depth and a level setting that picks the search budget on an exponential scale.
+- the match state: the back-to-back flag, the combo counter, the incoming attack, and the runner's combo table,
+- the search knobs: how deep into the known preview to look, and a level setting that picks the search budget on an exponential scale.
 
 Preparation then sets up the search:
 
@@ -54,9 +54,9 @@ After the piece lands, the runner calls again with the new state, and the cycle 
 
 Each player gets a separate engine instance, keyed by the player id, and calls for one player are handled one at a time. Between calls the instance keeps:
 
-- the transposition tables and the predicted board, so evaluated positions survive across moves when the prediction holds,
+- the transposition tables and the predicted board, so evaluated positions survive across moves when the prediction holds (see [Transposition table](<Transposition Table>)),
 - the learned per-depth branching estimates that shape the beam limit schedule, reset only when a game restarts,
-- the combo table, cached on first use,
+- the runner's combo table, cached on first use,
 - the AI's current parameters; a change is detected on the next call and triggers the full cache reset.
 
 Given the same game state and the same random state for sampling, a decision is reproducible: the search budget is a count rather than a clock, and every tie is broken the same way every time.

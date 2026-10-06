@@ -34,16 +34,16 @@ The fake horizon length and the branch count are runner-side knobs: the profiler
 Branches are independent only where they must be:
 
 - The beam limit schedule is computed once for the combined horizon, known placements plus the fake tail, and every branch runs under the same caps. See [Beam search](<Beam Search>) for the schedule itself.
-- The search runs once through the prefix covered by known pieces, one placement deeper when hold is enabled and a held piece is usable, since the swap is also a placement of a known piece. The frontier at that point is snapshotted, and every branch continues from it.
-- The branches place the last known piece with different expectations about the sampled tail, which can already change the paths the search prefers; from the following layer on, the placed pieces themselves differ.
+- The search runs once through all but the last of the placements covered by known pieces; with hold enabled and a held piece usable, that covered region is one placement deeper, since the swap is also a placement of a known piece. The frontier at that point is snapshotted, and every branch continues from it.
+- Each branch then places the last known piece under its own expectations about the sampled tail, which can already change the paths the search prefers; from the following layer on, the placed pieces themselves differ. Branches run one at a time, in a fixed order.
 - When nothing at all is known, no prefix is shared and every branch runs its own full search from the root.
 - Every branch's expansions update the learned per-depth branching estimates that the schedule uses, so the fake region is learned like the rest.
 
 ## Voting
 
-Each branch ends with one winning first move: the best candidate its own search found, traced back to its first placement. Votes are counted per first move, where a first move is identified by its landing position and whether it was a hold swap, and each count also remembers the best status any branch achieved with it.
+Each branch ends with one winning first move: the best candidate its own search found, traced back to its first placement. Votes are counted per first move, where a first move is identified by its landing position, piece and orientation included, and whether it was a hold swap; the spin grade is not part of the identity, so branches reporting the same landing with different grades count as one vote. Each count also remembers the best status any branch achieved with it.
 
-The most-voted first move wins. Ties go to the move with the better status, then to the earlier-generated one. If no branch produces a move, the engine falls back to requesting a hold when the branches asked for one.
+The most-voted first move wins. Ties go to the move with the better status, then to the earlier-generated one. A branch can also end without a placement and with a hold decision instead; the engine remembers such requests, and if no branch produces a placement at all, it falls back to the hold.
 
 ## Interaction with the caches
 

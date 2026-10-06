@@ -16,7 +16,7 @@ Shared engine vocabulary (board, roof, placement, depth, horizon, hold) is defin
 
 | Term | Meaning |
 |------|---------|
-| Spawn | The fixed spot where a newly entering piece appears, near the top of the field. |
+| Spawn | The spot where a newly entering piece appears, as the search hands it in; the AI's spawn call decides it (see [AI interface](<../Engine/AI interface>)). |
 | Landing | A spot where the piece can come to rest: a position and orientation, before any lines clear. A [placement](<../Engine/Glossary>) is a landing plus the clears it causes. |
 | Resting | A property of a landing: the piece cannot move further down from that spot. |
 | Tag | An extra value attached to every landing by the search. Its meaning belongs to the search layer, not to the movement mechanics; in the shipped engine it grades T-spins. |
@@ -49,7 +49,7 @@ The results are exact: a position is reported only if the allowed inputs can rea
 
 The checker answers, for any spot: can the piece shift or move down from there, and where does a rotation with its kicks land. Spin grading and [pathgen](<Pathgen>) both ask that checker, so there is one definition of "can move".
 
-haipa decides the inputs and interprets the outputs (landings, spin grades). The options are per-candidate: usually everything the runner allows. One exception exists for speed: soft drop and sonic drop are disabled for non-spin pieces unless the stack reaches the spawn area or the previous placement cleared lines. Floating mostly multiplies the spots to report and score, and above the roof it adds none. The movement model stays in an independent, benchmarked library; the engine's code stays about policy, not geometry.
+haipa decides the inputs and interprets the outputs (landings, spin grades). The options are per-candidate: usually everything the runner allows. One exception exists for speed: soft drop and sonic drop are disabled for pieces other than the spin piece, unless the piece would enter inside the stack's rows or the previous placement cleared lines. Floating mostly multiplies the spots to report and score, and above the roof it adds none. The movement model stays in an independent, benchmarked library; the engine's code stays about policy, not geometry.
 
 ## Spin classification
 
@@ -64,7 +64,7 @@ One placement can be delivered more than once: different kick sequences can reac
 
 ## What it costs and where it runs
 
-Movegen runs for every candidate the beam expands, once per piece choice: the current piece, plus the held piece when holding is available. The profiler's timing summary reports it as its own stage, named `search`, alongside the evaluation's stages, `eval` and `get`.
+Movegen runs for every candidate the beam expands, once per piece choice: the current piece, plus the held piece when holding is available. The profiler's timing summary reports it as its own stage, named `search` (the movement search, not the beam search), alongside the evaluation's stages, `eval` and `get`.
 
 ## What the beam search does with landings
 

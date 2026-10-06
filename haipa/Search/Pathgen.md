@@ -26,13 +26,13 @@ It always has the full option set, regardless of movegen's speed restriction: th
 
 ## Searching for the fastest inputs
 
-Pathgen runs a shortest-path search over movement states. A state is the position, the true orientation, and the spin collected so far. The moves are the runner's inputs:
+Pathgen runs a shortest-path search over movement states. A state is the position, the orientation, and the spin carried so far. The moves are the runner's inputs:
 
 - shift one cell left or right, or a held shift that slides until something blocks,
 - rotate, clockwise, counterclockwise, and 180 degrees when allowed, with the ruleset's kick tables applied,
 - soft drop one row, sonic drop to the resting spot, or hard drop.
 
-Every input adds its frame cost, and the cheapest total time wins; a state reached again more cheaply replaces its route. The search stops at a hard drop that reaches the landing, so the final input is always a hard drop and locks the piece exactly where promised. Hard drop costs no frames, and tie-breaking is deterministic: the same decision always yields the same path.
+Every input adds its frame cost, and the cheapest total time wins; a state reached again more cheaply replaces its route. The search stops at a hard drop that reaches the landing, so a path that places a piece always ends in a hard drop that locks it exactly where promised. Hard drop costs no frames, and tie-breaking is deterministic: the same decision always yields the same path.
 
 ## Reproducing the promised spin
 
@@ -44,11 +44,11 @@ The movement queries underneath, shifts, rotations with kicks, moving down, come
 
 ## Hold first
 
-When the decision starts with a hold swap, the hold input comes first, and the movement starts from the swapped-in piece's entry spot: what the AI's spawn call returned for it (see [AI interface](<../AI/AI interface>)). A decision can be "hold, then place", a pure hold swap, or a plain placement.
+When the decision starts with a hold swap, the hold input comes first, and the movement starts from the swapped-in piece's entry spot: what the AI's spawn call returned for it (see [AI interface](<../AI/AI interface>)). A decision can be "hold, then place", a pure hold swap, or a plain placement. A pure hold swap is the hold input alone, with nothing after it.
 
 ## When there is no path
 
-If the winning landing cannot be reached by any input sequence, the answer is no path rather than a wrong one, and the runner proceeds without inputs. This should not occur in normal operation: the landing was found through real movement, and pathgen has at least the options that found it.
+If the winning landing cannot be reached by any input sequence, the answer is no path rather than a wrong one, and the runner proceeds without inputs. This should not occur in normal operation: the landing was found through real movement, and pathgen has at least the options that found it. The promised spin is the one requirement that can still cut every route, and then the answer is no path.
 
 ## The inputs the runner receives
 
