@@ -54,4 +54,5 @@ Readers cannot see the code, so pages must stand alone without it.
 - Prefer short paragraphs, bullets, and tables over long prose.
 - Do not overexplain: state each behavior and each reason once. Cut restatements, edge-case inventories, and caveats the reader cannot act on.
 - Prefer plain words: "go down" not "descend", "extra" not "auxiliary", "stop" not "halt". Specialized game terms stay; formality goes.
+- Keep a natural tone: write the way one person explains something to another, not like a formal spec or marketing copy.
 - Write for a reader who has never seen the implementation and cannot ask the code questions.
