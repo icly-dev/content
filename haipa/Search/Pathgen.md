@@ -38,7 +38,7 @@ Every input adds its frame cost, and the search prefers the cheapest total time,
 
 The spin grade the beam scored is a promise, and the game will only honor it if the executed inputs actually end with the right rotation. So the spin is part of the movement state: after every rotation along the path it is re-derived from the board with the same corner and kick rules the [movegen sweep](<Movegen#spin-classification>) used, and a route that arrives with the wrong spin does not count as reaching the goal. The output path therefore ends in a rotation that produces the promised spin, or there is no path at all.
 
-This is also what keeps the two layers consistent: both grade spins with the same rules, so a grade that was scored is a grade the runner can reproduce.
+This is also what keeps the two layers consistent: both grade spins with the same rules, so a grade that was scored is a grade the runner can reproduce. The underlying movement queries, shifts, rotations with kicks, and descent, all come from the same public movement library, [fast-reachability](https://github.com/icly-dev/fast-reachability), that [movegen](<Movegen>) is built on.
 
 ## Hold first
 

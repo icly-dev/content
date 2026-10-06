@@ -73,6 +73,18 @@ Two consequences are worth stating plainly:
 - The movement options depend on the candidate's history (the clear count travels with it), not only on the board. Two candidates on similar boards can face different movement rules.
 - The restriction shapes only movegen. The [pathgen](<Pathgen>) always has the full option set, so whatever the beam chose can be executed.
 
+## Built on fast-reachability
+
+Movegen is a thin layer over a separate, public movement library, [fast-reachability](https://github.com/icly-dev/fast-reachability). The library owns the movement model itself:
+
+- the bitboard representation the sweep runs on,
+- the sweep: the per-orientation position sets, the shifts, the rotations with their kick tables, and the descent,
+- the movement checker: a query object that answers, for any spot, whether the piece can shift or descend from there, and where a rotation with its kicks would land.
+
+Both the spin grading below and [pathgen](<Pathgen>) ask that checker, which is what keeps the layers consistent: there is one definition of "can move".
+
+haipa supplies everything around it: which pieces and kick tables apply (the ruleset), which options are allowed per candidate (the floating restriction above), the spin grading pass, and the pathgen search. Keeping the movement model in an independent library means it is developed and benchmarked on its own, and the engine's own code stays about policy, not geometry.
+
 ## Spin classification
 
 Spin detection runs over the landings of the spin piece only, as a grading pass on top of the sweep. In the ruleset this engine ships with, that piece is the T, and the tag grades each landing none, mini, or full.
