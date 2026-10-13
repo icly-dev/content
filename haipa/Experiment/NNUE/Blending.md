@@ -6,7 +6,7 @@ title: NNUE blending experiment
 
 **Status: planned**
 
-An experiment testing whether a blend of two evaluation sources, tuned by CMA-ES, can push gameplay past both pure systems. It couples two changes: a blend weight between the distilled net and the hand eval, and a new label recipe (line-end) that gives the net evaluation knowledge the hand eval does not contain. The arms tried before it, including the refuted ones, are recorded in [History](<History>).
+An experiment testing whether a blend of two evaluation sources, tuned by CMA-ES, can push gameplay past both pure systems. It couples two changes: a blend weight between the distilled net and the hand eval, and a new label recipe (line-end) that gives the net evaluation knowledge the hand eval does not contain. The arms tried before it, including the refuted ones, each have a page in this directory; [Protocol](<Protocol>) collects the standing conventions and the strength ladder.
 
 Shared engine vocabulary (board, evaluation, status, depth, horizon, hold, search budget) is defined in the [Glossary](<../../Engine/Glossary>); search terms (beam, leaf, survivor) in [Beam search](<../../Engine/Beam Search>); battle terms (seat, seed pair, standard error, z) in [Theta comparison](<../../Tuning/Theta comparison>); tuning terms (candidate, Elo, generation, anchor) in [CMA-ES](<../../Tuning/CMA-ES>); match terms (Options, seat iters) in [Match API](<../../Tuning/Match API>). This page adds:
 
@@ -27,7 +27,7 @@ The distillation loop has been iterated five times: play collection games betwee
 
 * Removing collection jitter from the hand seat: 18% to 37% of games won against production.
 * Training on the net's own states, which fixed the field collapsing on the played distribution: 25% to 36%.
-* Retaining death labels (boards where the teacher's line dies) made the net play more defensively at a small strength cost; parked as a style variant.
+* Retaining [death labels](<Death labels>) (boards where the teacher's line dies) made the net play more defensively at a small strength cost; parked as a style variant.
 
 The loop has plateaued: at 300 games the two strongest nets score 40.0% and 38.7% against production, statistically tied (the 45% and 39% ladder readings at 100 games were noise). The reason is structural. Every label is a hand eval value, so the net is a pure approximation of the hand eval. Its deviations from the hand eval on live states are approximation error, not new knowledge. Iterating the loop re-weights where the net trains, but the value ordering it learns is always the teacher's. The reachable fixed point is the hand ordering fit tightly on the states the system itself generates, which sits near the current hand configuration.
 
@@ -47,7 +47,7 @@ The collection tool already replays teacher lines for other label modes. Line-en
 
 * Why not search scores as labels: the engine accumulates reward per placement (attack, like-chains), so search values grow with the search horizon. Training on them produced the ante-peak death spiral of the first two nets, which kept stacking to chase reward that only existed behind the horizon. A bounded label is one that cannot grow with horizon; the faithful bounded label for an accumulating evaluator is the terminal value of the line.
 * Why not a stronger teacher instead: deeper teacher search changes which line the teacher picks, and stronger teachers were observed to block survival more often. Line-end labels keep the selection and the data distribution unchanged and change only the target value.
-* Lineage warning: two earlier line-based label recipes failed, but they accumulated per-line reward; the terminal value is a different quantity and does not inherit their failure mode.
+* Lineage warning: two earlier line-based label recipes failed ([Line labels](<Line labels>)), but they accumulated per-line reward; the terminal value is a different quantity and does not inherit their failure mode.
 * Cost: one new label mode plus one labeling pass per pool.
 
 ## The blend
