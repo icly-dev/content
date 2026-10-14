@@ -4,7 +4,7 @@ title: NNUE blending experiment
 
 # NNUE blending experiment
 
-**Status: planned**
+**Status: refuted at six plies**
 
 An experiment testing whether a blend of two evaluation sources, tuned by CMA-ES, can push gameplay past both pure systems. It couples two changes: a blend weight between the distilled net and the hand eval, and a new label recipe (line-end) that gives the net evaluation knowledge the hand eval does not contain. The arms tried before it, including the refuted ones, each have a page in this directory; [Protocol](<Protocol>) collects the standing conventions and the strength ladder.
 
@@ -71,6 +71,15 @@ The collection tool already replays teacher lines for other label modes. Line-en
 * Blocking survival not worse on the host test.
 * Blend weight stabilizes strictly between zero and one: the net is contributing, not decorative.
 
+The label half of the experiment ran first, as a straight A/B at the pure net (no blend), because blending a net that is no better than today's net can at best reproduce the hand eval. The control arm trained on the usual per-board labels, the treatment arm swapped the freshest pool's labels for line-end labels, everything else identical (same collection, same sample of boards, same training run). The blend and tuning stage was gated on the treatment winning that A/B, and it did not:
+
+* Head-to-head, 200 games: the line-end net won 49.5%, a coin flip.
+* Against production, 100 games: control 41%, treatment 42%, both inside the plateau band of the incumbent nets.
+* Success criteria not met, so the blend-plus-tuning stage never started.
+
+Why the label added nothing: the line-end targets correlate 0.82 with the static targets on the same boards, and the disagreements carry no consistent extra signal the search can spend. They are also narrower (spread about 0.8x the static labels), which is the signature that historically made nets softer and more prone to upstacking, not less. A side observation worth keeping: replaying the teacher's greedy line doubles as a danger oracle. It flagged 4,150 of a million boards whose line dies even though the boards' own hand eval values look unremarkable, the exact population the parked death-label variant targets.
+
+Deeper lines were not tried: twelve plies doubles the labeling cost and the smoke runs already showed deeper lines drift further from static consistency, so the verdict would need the treatment to overcome a wider target gap. If the plateau is ever attacked again, the richer-encoding direction (pattern embeddings) has better evidence behind it than deeper labels.
+
 ## Results
 
-TBD.

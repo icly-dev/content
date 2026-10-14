@@ -38,5 +38,7 @@ Shared vocabulary in [Glossary](<../../Engine/Glossary>); battle statistics in [
 | v10s | 39% | 38.7% | one more pool |
 | v11s | 44% | 36.3% | one more pool |
 | v9sd | 46% | 35.3% | death labels on the v9s pools |
+| v12c | 41% | | one more pool |
+| v12t | 42% | | one more pool, freshest labeled line-end |
 
 The 300-game column shows the pattern: fresher pools play cleaner but score no higher against production. The loop plateaued with the current recipe, which motivates [Blending](<Blending>).
