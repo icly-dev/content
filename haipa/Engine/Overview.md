@@ -26,7 +26,7 @@ The runner normally calls the engine once per placed piece. Each call includes t
 - the playfield, 10 cells wide and 22 rows tall, plus one row above it for incoming garbage (the engine's internal board is taller still; the rule layer declares it),
 - the active piece with its position and rotation, in the runner's coordinates,
 - the held piece and whether holding is currently allowed, plus whether 180-degree spins are allowed,
-- the known preview, whose length sets how deep the search can look with certainty,
+- the known preview, whose length sets how deep the search can look; when only one piece of the current bag is still unseen, the engine deduces it and looks one piece deeper (see [Bag deduction](<Bag deduction>)),
 - the match state: the back-to-back flag, the combo counter, the incoming attack, and the runner's combo table,
 - the search knobs: how deep into the known preview to look, and how much search work to spend,
 
@@ -34,6 +34,7 @@ Before searching, the engine prepares the current state:
 
 - It loads the playfield and the active piece's position.
 - It adds the match state (combo, back-to-back, and incoming attack) to the running status.
+- It deduces the last unseen piece of the current bag when only one is left, and adds it to the queue the search uses (see [Bag deduction](<Bag deduction>)).
 - It updates the caches. If the AI's parameters changed since the last call, it clears them. Otherwise, it reuses the transposition tables as described in [Transposition table](<Transposition Table>).
 
 The [beam search](<Beam Search>) expands placements one depth at a time under a precomputed beam limit schedule. It scores candidates using cached board evaluations and stops early if the whole beam agrees on the first placement. The move generator ([movegen](<../Search/Movegen>)) supplies the reachable spots for each piece and identifies spin landings.

@@ -15,6 +15,7 @@ The haipa docs cover the engine, its movement layers, the AI it uses, and the tu
 - [Overview](haipa/Engine/Overview) explains how input becomes a decision,
 - [Glossary](haipa/Engine/Glossary) defines terms used across the docs,
 - [Beam search](<haipa/Engine/Beam Search>) describes how the engine explores possible moves,
+- [Bag deduction](<haipa/Engine/Bag deduction>) explains how the engine learns the last piece of the current bag and searches one piece deeper,
 - [Transposition table](<haipa/Engine/Transposition Table>) explains how repeated board evaluations are cached,
 - [AI interface](<haipa/AI/AI interface>) explains how the engine asks the AI where pieces enter, evaluates boards, and scores candidates,
 - [Rule layer](<haipa/Rule/Rule layer>) covers ruleset details supplied by the AI: the board, mino types, rotation system, and the question the engine asks,

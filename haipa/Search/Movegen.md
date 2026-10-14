@@ -19,11 +19,11 @@ Shared engine vocabulary (board, roof, placement, depth, horizon, hold) is defin
 | Spawn | The position where a newly entering piece appears. The AI's answer determines it (see [AI interface](<../Engine/AI interface>)). |
 | Landing | A spot where the piece can come to rest: a position and orientation, before any lines clear. A [placement](<../Engine/Glossary>) is a landing plus the clears it causes. |
 | Resting | A property of a landing: the piece cannot move further down from that spot. |
-| Tag | An additional value the search attaches to every landing. Its meaning belongs to the search layer, not the movement mechanics. In the shipped engine, it records the T-spin grade. |
+| Tag | An additional value the search attaches to every landing. Its meaning belongs to the search layer, not the movement mechanics. In the shipped search, it records the T-spin grade. |
 | Kick | The nudge a ruleset applies when a rotation is blocked; kicks can shift a piece sideways or upward while it rotates. |
 | Floating movement | Inputs that let the piece move down under control: soft drop, one row at a time, and sonic drop, down to the resting spot without locking. Floating is what lets a piece slide under an overhang while it falls. |
 | Hard drop | Straight down to the resting spot, locking immediately. |
-| Spin | A landing reached by rotating into a tight pocket rather than falling into it. The ruleset this engine ships with rewards these for one piece, the T, and grades them into a full spin and a weaker mini spin. |
+| Spin | A landing reached by rotating into a tight pocket rather than falling into it. The shipped search rewards these for one piece, the T, and grades them into a full spin and a weaker mini spin; another search the engine ships grades every piece, spin or not, without the mini split. |
 
 ## The contract
 
@@ -34,7 +34,7 @@ Movegen takes:
 - the runner's movement options, such as whether 180-degree rotations are allowed,
 - the candidate's context: the current stack roof and whether the previous placement cleared lines.
 
-It reports every reachable landing as a position and orientation, along with a tag. The tag belongs to the search, not the movement mechanics. In the shipped engine, it records whether a T-spin is none, mini, or full; another search could use it for something else. Movegen reports landings one at a time through a callback, and the search places and scores each one as it arrives. It runs for every candidate at every depth.
+It reports every reachable landing as a position and orientation, along with a tag. The tag belongs to the search, not the movement mechanics. In the shipped search, it records whether a T-spin is none, mini, or full; another search could use it for something else. Movegen reports landings one at a time through a callback, and the search places and scores each one as it arrives. It runs for every candidate at every depth.
 
 Movegen does not score placements. It determines where a piece can go; the evaluation decides whether a landing is good. Movegen must be fast, report every reachable landing, and remain correct regardless of how the evaluation changes.
 
@@ -50,7 +50,7 @@ haipa chooses the inputs and interprets the outputs, including landings and spin
 
 ## Spin classification
 
-Spin detection checks only the landings of the spin piece. It uses the movement checker to grade the returned positions. In the shipped ruleset, the spin piece is the T, and the tag records a grade of none, mini, or full.
+Spin detection checks only the landings of the spin piece. It uses the movement checker to grade the returned positions. Which pieces count as spin pieces belongs to the search: the shipped search grades the T into none, mini, or full, while the engine's other search asks only whether each landing of any piece is a spin.
 
 1. **Pinned.** The piece must be unable to move farther down from the landing. Otherwise, it has not spun.
 2. **Corners.** The four diagonal cells around the piece's center are checked against the board. If enough are occupied, the piece is wedged in a way that only a rotation could produce.
