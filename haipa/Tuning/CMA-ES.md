@@ -20,7 +20,7 @@ The search starts from the shipped default theta. The cloud's center is represen
 
 ## One round
 
-Each round samples candidates from the cloud, converts the points into thetas, and sends them to the Elo tournament with the anchor. The ratings guide the next update: the cloud moves toward stronger candidates and changes shape to learn which directions in the theta matter and how those directions interact. Sampling, battling, and updating together make up one generation.
+Each round samples candidates from the cloud, converts the points into thetas, and sends them to the Elo tournament. The ratings guide the next update: the cloud moves toward stronger candidates and changes shape to learn which directions in the theta matter and how those directions interact. Sampling, battling, and updating together make up one generation.
 
 ## The deliverable
 

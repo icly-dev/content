@@ -10,14 +10,13 @@ Each search generation proposes candidates, but it has no quality score for them
 
 | Term | Meaning |
 |------|---------|
-| Participant | One candidate theta, plus the anchor, all playing the same tournament. |
+| Participant | One candidate theta playing the same tournament. |
 | Elo | A rating that each battle's score pushes up or down. Higher means better within this tournament. |
 | Match quota | The number of battles every participant is guaranteed, 64 by default. |
-| Anchor | The shipped theta, playing unchanged, that pins what the ratings mean. |
 
 ## The field
 
-Each tournament includes the generation's candidates and one fixed anchor, the shipped default theta. The anchor matters because Elo measures relative strength. A candidate's rating means little on its own, but its gap from the anchor shows whether the generation is stronger or weaker than the shipped AI. Ratings start equal at the beginning of each generation and reset at the end. The tournament ranks one generation at a time rather than tracking ratings across generations.
+Each tournament includes only the generation's candidates. Elo measures relative strength, so a candidate's rating means how it compares to the rest of the generation. Ratings start equal at the beginning of each generation and reset at the end. The tournament ranks one generation at a time rather than tracking ratings across generations.
 
 ## Who plays whom
 
@@ -29,4 +28,4 @@ Opponents are chosen from an Elo neighborhood around the first player's rank. Th
 
 Elo uses a 400-point logistic curve to calculate each player's expected score from the two ratings. It compares that expectation with the battle's actual score, then adjusts both ratings toward the result. The step size starts at 24 by default and drops to 4 as a participant approaches its quota. Early matches shape the standings quickly; later ones refine them.
 
-Battles run on a thread pool. Selection counts matches already in progress, so every participant still finishes with the same quota. Candidate ratings become the generation's fitness, and the anchor's rating is reported for context.
+Battles run on a thread pool. Selection counts matches already in progress, so every participant still finishes with the same quota. Candidate ratings become the generation's fitness.

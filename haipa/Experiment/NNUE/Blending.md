@@ -8,7 +8,7 @@ title: NNUE blending experiment
 
 An experiment testing whether a blend of two evaluation sources, tuned by CMA-ES, can push gameplay past both pure systems. It couples two changes: a blend weight between the distilled net and the hand eval, and a new label recipe (line-end) that gives the net evaluation knowledge the hand eval does not contain. The arms tried before it, including the refuted ones, each have a page in this directory; [Protocol](<Protocol>) collects the standing conventions and the strength ladder.
 
-Shared engine vocabulary (board, evaluation, status, depth, horizon, hold, search budget) is defined in the [Glossary](<../../Engine/Glossary>); search terms (beam, leaf, survivor) in [Beam search](<../../Engine/Beam Search>); battle terms (seat, seed pair, standard error, z) in [Theta comparison](<../../Tuning/Theta comparison>); tuning terms (candidate, Elo, generation, anchor) in [CMA-ES](<../../Tuning/CMA-ES>); match terms (Options, seat iters) in [Match API](<../../Tuning/Match API>). This page adds:
+Shared engine vocabulary (board, evaluation, status, depth, horizon, hold, search budget) is defined in the [Glossary](<../../Engine/Glossary>); search terms (beam, leaf, survivor) in [Beam search](<../../Engine/Beam Search>); battle terms (seat, seed pair, standard error, z) in [Theta comparison](<../../Tuning/Theta comparison>); tuning terms (candidate, Elo, generation) in [CMA-ES](<../../Tuning/CMA-ES>); match terms (Options, seat iters) in [Match API](<../../Tuning/Match API>). This page adds:
 
 | Term | Meaning |
 |------|---------|

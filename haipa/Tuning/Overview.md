@@ -23,7 +23,6 @@ theta candidates -> battles -> Elo ranking -> search step -> better candidates
 |------|---------|
 | Theta | The list of numbers the AI's judgment is built on, 44 in the shipped AI. Tuning searches this list. |
 | Generation | One round of the loop: sample candidates, battle, rank, update the search. |
-| Anchor | The shipped theta, playing every generation's tournament unchanged. It pins what the rankings mean. |
 | Black box | A search that sees only outcomes. Battles return wins, ties and losses, never the inside of the evaluation. |
 
 ## Why battles decide
