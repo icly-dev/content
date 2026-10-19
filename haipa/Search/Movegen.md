@@ -16,7 +16,7 @@ Shared engine vocabulary (board, roof, placement, depth, horizon, hold) is defin
 
 | Term | Meaning |
 |------|---------|
-| Spawn | The position where a newly entering piece appears. The AI's answer determines it (see [AI interface](<../Engine/AI interface>)). |
+| Spawn | The position where a newly entering piece appears. The AI's answer determines it (see [AI interface](<../AI/AI interface>)). |
 | Landing | A spot where the piece can come to rest: a position and orientation, before any lines clear. A [placement](<../Engine/Glossary>) is a landing plus the clears it causes. |
 | Resting | A property of a landing: the piece cannot move further down from that spot. |
 | Tag | An additional value the search attaches to every landing. Its meaning belongs to the search layer, not the movement mechanics. In the shipped search, it records the T-spin grade. |
@@ -61,7 +61,7 @@ A placement can be reported more than once. Different kick sequences may reach t
 
 ## What it costs and where it runs
 
-Movegen runs for every candidate expanded by the beam, once for each piece choice: the current piece and, when holding is allowed, the held piece.
+Movegen runs for every candidate expanded by the beam, once for each piece choice: the current piece and, when holding is allowed, the held piece. A piece with no free entry spot is skipped instead of searched; when the current piece is the one skipped, the hold branch still runs.
 
 ## What the beam search does with landings
 

@@ -35,9 +35,9 @@ Before searching, the engine prepares the current state:
 - It loads the playfield and the active piece's position.
 - It adds the match state (combo, back-to-back, and incoming attack) to the running status.
 - It deduces the last unseen piece of the current bag when only one is left, and adds it to the queue the search uses (see [Bag deduction](<Bag deduction>)).
-- It updates the caches. If the AI's parameters changed since the last call, it clears them. Otherwise, it reuses the transposition tables as described in [Transposition table](<Transposition Table>).
+- It updates the caches, reusing the transposition tables as described in [Transposition table](<Transposition Table>), unless the call brings different AI parameters, in which case it clears them.
 
-The [beam search](<Beam Search>) expands placements one depth at a time under a precomputed beam limit schedule. It scores candidates using cached board evaluations and stops early if the whole beam agrees on the first placement. The move generator ([movegen](<../Search/Movegen>)) supplies the reachable spots for each piece and identifies spin landings.
+The [beam search](<Beam Search>) expands placements one depth at a time under a precomputed beam limit schedule. It scores candidates using cached evaluations and stops early if the whole beam agrees on the first placement. The move generator ([movegen](<../Search/Movegen>)) supplies the reachable spots for each piece and identifies spin landings.
 
 The decision is the best candidate from the deepest completed layer, traced back to its first placement. It specifies where the active piece should land, or whether to swap in the held piece first. The [path generator](<../Search/Pathgen>) turns that choice into a command string.
 
@@ -57,6 +57,6 @@ Each player has a separate engine instance, keyed by player ID, and calls for th
 
 - the transposition tables and predicted board, so previously evaluated positions can be reused when the prediction holds (see [Transposition table](<Transposition Table>)),
 - the runner's combo table, cached the first time it is used,
-- the AI's current parameters. The engine checks for changes on the next call; when the parameters changed, it clears the transposition tables and forgets the prediction.
+- the AI's current parameters. When a call brings different parameters, the engine clears the transposition tables and forgets the prediction.
 
 With the same game state, a decision is reproducible. The search budget is a count rather than a time limit, and ties are always broken the same way.

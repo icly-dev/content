@@ -10,13 +10,13 @@ Battles and the tournament show which candidates are better, but the search stil
 
 | Term | Meaning |
 |------|---------|
-| Search space | The theta, centered on the shipped defaults, with every dimension scaled to a comparable range. |
+| Search space | The theta, measured as offsets from a chosen center, with every dimension scaled to a comparable range. |
 | Sigma | How far the cloud spreads when sampling. |
 | Mean | The center of the cloud after the latest round, the current best guess of a good theta. |
 
 ## The space
 
-The search starts from the shipped default theta. The cloud's center is represented as offsets from those defaults, with each offset scaled to its dimension's size and a minimum scale of one tenth. This keeps features with large values from dominating features with small values just because of their units. The spread starts at sigma 0.3, and the default population is 30 candidates per generation.
+The search starts from a center theta: the shipped defaults unless a different starting point is chosen, such as all zeros or a theta read from a file. The cloud's center is represented as offsets from that center, with each offset scaled to its dimension's size and a minimum scale of one tenth. This keeps features with large values from dominating features with small values just because of their units. The spread starts at sigma 0.3, and the default population is 30 candidates per generation.
 
 ## One round
 
@@ -28,4 +28,4 @@ The search does not select a champion or pick the best candidate. Instead, it wr
 
 ## Stopping and resuming
 
-The round count sets the search budget, and the search can also stop when its convergence criteria are met. At the end of each generation, it saves its state so you can interrupt a run and resume it later. The state includes the configuration and will not resume if the tournament settings have changed. It is stored in pickle format, so load only state files you created yourself.
+The round count sets the search budget, and the search can also stop when its convergence criteria are met. At the end of each generation, it saves its state so you can interrupt a run and resume it later. The state includes the configuration and the center it started from, and it will not resume if those settings have changed. It is stored in pickle format, so load only state files you created yourself.

@@ -66,4 +66,4 @@ The deepest-best rule instead plays the first move of the highest-evaluated leaf
 
 The hypothesis is refuted at both tested search budgets, with margins far beyond noise. The deepest-best rule stays the shipped behavior.
 
-The vote rule remains available as a battle option for future experiments. The natural remaining regime is a narrow search budget, where few lines survive and the votes are sparse; the experiments above covered budgets of 100 and 200, where the beam is wide enough that popularity and quality separate cleanly.
+The vote rule is not part of the engine today, so a retest would have to bring it back. The natural remaining regime is a narrow search budget, where few lines survive and the votes are sparse; the experiments above covered budgets of 100 and 200, where the beam is wide enough that popularity and quality separate cleanly.

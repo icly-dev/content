@@ -20,9 +20,11 @@ The rule layer declares the board type, which serves as the canonical definition
 
 In the ruleset these docs describe, the board is 10 cells wide and 24 rows tall.
 
+A ruleset can also declare a visible height: the row above which a piece that locks counts as topping out. The match layer asks for it when the ruleset provides it.
+
 ## The ruleset
 
-The ruleset declares its mino types and rotation system. The ruleset these docs describe is deliberately simplified: its tetromino set and SRS rotation system with kicks come from the movement library [fast-reachability](https://github.com/icly-dev/fast-reachability), rather than the rule layer. Later rulesets can define their own piece sets and rotation systems in the rule layer.
+The ruleset declares its mino types and rotation system. The ruleset these docs describe is deliberately simplified: its tetromino set and SRS rotation system with kicks come from the movement library [fast-reachability](https://github.com/icly-dev/fast-reachability), rather than the rule layer. A ruleset that needs different pieces or kicks defines them in the rule layer instead.
 
 ## What the engine asks
 

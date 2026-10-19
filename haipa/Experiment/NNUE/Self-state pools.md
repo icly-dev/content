@@ -24,4 +24,4 @@ Output spread restored to parity and the height tilt disappeared on self-states.
 
 ## The verdict
 
-**Adopted.** Every pool since is mixed-seat. The base label is the [board-static](<Board-static labels>) recipe.
+**Adopted.** Every pool after it was mixed-seat. The base label is the [board-static](<Board-static labels>) recipe.

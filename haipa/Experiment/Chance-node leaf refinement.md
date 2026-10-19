@@ -24,7 +24,7 @@ The hypothesis says that re-scoring the top leaves as an expectation over the se
 
 ## Method
 
-The refinement was implemented in the engine, gated by a new 45th theta parameter (`chance`, default 0) so production behavior was untouched until a weight was adopted:
+The refinement was implemented in the engine, gated by a new theta parameter (`chance`, default 0) so production behavior was untouched until a weight was adopted:
 
 - At the final beam depth the surviving children were screened into a top-k set, then each leaf was re-scored. For each of the seven piece types the leaf was copied as a parent, a normal spawn was dealt, and the best child placement was evaluated. The chance value was the leaf value plus a weight times the marginal over pieces, with the leaf that has no legal continuation scored minus infinity.
 - Two bookkeeping variants were tested: skipping dead chance outcomes, and including them with their encoded death value. The second removes a survivorship bias in principle.

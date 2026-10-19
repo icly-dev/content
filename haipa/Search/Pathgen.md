@@ -15,7 +15,7 @@ Shared engine vocabulary is defined in the [Glossary](<../Engine/Glossary>), and
 | Term | Meaning |
 |------|---------|
 | Input path | The sequence of inputs the runner executes to carry the piece to the chosen landing. One character per input. |
-| Frame | The unit of execution time the runner plays in. Inputs carry frame costs, so paths can be compared by total time. |
+| Frame | The unit of execution time the runner plays in. When a ruleset prices inputs in frames, a path's cost is the total time it takes. |
 | Held shift | One input that slides the piece several cells at once, as if the direction were held down. |
 
 ## The contract
@@ -32,13 +32,13 @@ Pathgen searches for the shortest route through movement states. Each state reco
 - Rotate clockwise, counterclockwise, or 180 degrees when allowed, using the ruleset's kick tables.
 - Soft drop one row, sonic drop to the resting spot, or hard drop.
 
-Each input has a cost, and the route with the lowest total time wins. If pathgen reaches a state by a cheaper route, it replaces the previous route. The search ends when a hard drop reaches the chosen landing. Any path that places a piece therefore ends with a hard drop that locks it exactly where expected. Tie-breaking is deterministic, so the same decision always produces the same path.
+Each input has a cost, and the route with the lowest total cost wins. A ruleset decides how inputs are priced: charging a held shift or a drop for the distance it covers makes the search prefer the fastest route, while giving every input the same cost makes it prefer the route with the fewest inputs. If pathgen reaches a state by a cheaper route, it replaces the previous route. The search ends when a hard drop reaches the chosen landing. Any path that places a piece therefore ends with a hard drop that locks it exactly where expected. Tie-breaking is deterministic, so the same decision always produces the same path.
 
 ## Reproducing the promised spin
 
-The scored spin grade is a promise: the game honors it only if the executed inputs produce the right rotation. Pathgen therefore tracks spin as part of the movement state and recomputes it after every rotation, using the same corner and kick rules as the [movegen grading pass](<Movegen#spin-classification>). A route that reaches the landing with the wrong spin does not count as a solution. The output must end with a rotation that produces the promised grade, or pathgen returns no path.
+The scored spin grade is a promise: the game honors it only if the executed inputs produce the right rotation. Pathgen therefore tracks spin as part of the movement state and recomputes it after every rotation, using the same corner rule as the [movegen grading pass](<Movegen#spin-classification>). A route that reaches the landing with the wrong spin does not count as a solution. When the promised grade is a spin, the output must end with a rotation that produces it, or pathgen returns no path.
 
-Both layers use the same spin-grading rules, so the scored grade can be reproduced.
+Both layers grade spins by the same corner rule, so the scored grade can be reproduced.
 
 The movement queries for shifts, rotations with kicks, and downward movement come from [fast-reachability](https://github.com/icly-dev/fast-reachability), the same public library used by [movegen](<Movegen>).
 

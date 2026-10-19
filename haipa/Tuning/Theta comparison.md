@@ -36,11 +36,14 @@ The tool runs two batches using one shared run seed, so you can reproduce a repo
 Each battle scores 1.0, 0.5, or 0.0 from the first seat's perspective. Both batches report a mean and standard error:
 
 ```text
-seed=... games=...
+platform=... seed=... games=...
 A.bin vs B.bin: <duel mean> (+- <duel standard error>) [<loss> loss, <tie> tie, <win> win]
 seat self-match: <seat mean> (+- <seat standard error>)
+attack per piece (no multiplier): <duel value> vs <seat value> [<attack>/<pieces> vs <attack>/<pieces>]
 verdict: <conclusion> (z=<z>, seat-adjusted z=<adjusted z>)
 ```
+
+The first line records which AI was compared, the run seed, and the game count, so a report can be reproduced later. The attack line reports the attack each side sent per piece placed, before any scoring multiplier is applied, along with the raw totals behind those averages. It is context for how the two thetas differ, not part of the verdict.
 
 The verdict compares the duel mean with a coin-flip score of one half. If the mean is two standard errors above one half, the first theta is declared better. If it is two standard errors below, the second theta is better. Anything between those thresholds is not a significant difference.
 

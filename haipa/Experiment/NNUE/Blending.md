@@ -15,7 +15,7 @@ Shared engine vocabulary (board, evaluation, status, depth, horizon, hold, searc
 | Net (NNUE) | A small neural network trained to reproduce the hand eval's values, quantized so evaluating a board is fast. Distilled, not self-taught: its only teacher is the hand eval. |
 | Hand eval | The hand-written per-board evaluation. |
 | Teacher | The hand eval, acting as the label source during collection. |
-| Field | The per-board evaluation term the search adds to the rewards it accumulates per placement. Today it comes from one source: the net, or the hand eval before the net existed. |
+| Field | The per-board evaluation term the search adds to the rewards it accumulates per placement. The shipped engine computes it by hand; this experiment swapped the net in. |
 | Blend weight | The share of the field taken from the net; the rest comes from the hand eval. |
 | Line-end label | Training target: the hand eval value of the final board of the teacher's greedy line. |
 | Residual-roof tilt | The correlation between the net's error and stack height. Positive values mean the net rates tall stacks too kindly, the signature of upstacking. |

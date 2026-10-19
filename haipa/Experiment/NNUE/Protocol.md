@@ -6,6 +6,8 @@ title: NNUE experiment protocol
 
 **Status: standing**
 
+The net is not part of the shipped engine. This directory records the research line: what each arm tried, what it measured, and why it ended adopted, parked, or refuted.
+
 Conventions every arm in this directory follows, learned mostly by paying for their absence.
 
 Shared vocabulary in [Glossary](<../../Engine/Glossary>); battle statistics in [Theta comparison](<../../Tuning/Theta comparison>); tuning terms in [CMA-ES](<../../Tuning/CMA-ES>).

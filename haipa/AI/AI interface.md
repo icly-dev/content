@@ -48,16 +48,17 @@ Rulesets use that freedom. In tetr.io, for example, the entry spot moves up if t
 
 Gravity is another example. The suggested spawn is absolute, but by the time the engine finishes searching and the runner starts the move, the AI's answer determines the piece's actual y coordinate at entry.
 
-The shipped AI returns the suggested spawn unchanged because its target ruleset makes no entry adjustments.
+An AI whose ruleset makes no entry adjustments returns the suggested spawn unchanged.
 
-## The board-only evaluation
+## The evaluation
 
-The engine evaluates each new board once. The evaluation receives:
+The engine evaluates each new position once. The evaluation receives:
 
 - the resulting board, in the engine's row form (one value per row, a bit set for each occupied cell) or as the rule layer's board type, whichever the AI provides an evaluation for,
-- the board's roof.
+- the board's roof,
+- the environment, so an AI may look at the pieces still to come and at what the hold slot will hold.
 
-What the evaluation measures is up to the AI. Typical examples include board-shape features such as bumpiness and aggregate height. The engine caches each result under the board's hash (see [Transposition table](<../Engine/Transposition Table>)), so the result must depend only on the board. Candidates that land different pieces on the same board therefore share one evaluation.
+What the evaluation measures is up to the AI. Typical examples include board-shape features such as bumpiness and aggregate height. An AI whose pieces behave differently depending on what follows them can read the queue as well. The engine caches each result under a key made from the board, its roof, and the piece that will be in hold (see [Transposition table](<../Engine/Transposition Table>)), so candidates that reach the same key share one evaluation.
 
 ## The context step
 
@@ -73,7 +74,7 @@ Context scoring runs for every candidate placement. It takes:
 
 It returns the child's status, a running assessment used to rank candidates and carry match state forward, including line clears, combo, and back-to-back. Rewards can reflect events from the placement, such as a back-to-back chain, a combo, a spin, or whether a piece like the I was used or saved for later. These examples show what the inputs make it possible to judge. Which signals a particular AI uses is up to that AI.
 
-Splitting evaluation into these two stages makes board evaluations cacheable. The [Transposition table](<../Engine/Transposition Table>) page explains the split in detail.
+Splitting evaluation into these two stages is what makes the first one cacheable. The [Transposition table](<../Engine/Transposition Table>) page explains the split in detail.
 
 When the AI declares a fixed list of priority pieces, the environment also carries, for each one, how many pieces away it sits in the known preview.
 
@@ -83,4 +84,13 @@ The rule layer answers what belongs to the ruleset rather than to judgment: the 
 
 ## Optional hooks
 
-Three parts of the interface are optional, and the engine works without each of them: a custom board hash instead of the built-in one, a conversion from the board to the engine's row form, and the priority pieces behind the piece distances in the environment.
+Most of the interface is optional. The engine detects which parts an AI provides and works with any subset of them:
+
+- The evaluation may take the board in either form, and it may take the environment or leave it out.
+- The context step may likewise be written with or without the environment.
+- A custom board hash can replace the built-in one.
+- A conversion from the board to the engine's row form can replace the built-in one.
+- The AI can declare priority pieces, which the environment then reports distances for.
+- The AI can fingerprint the state it carries, which lets the search collapse duplicate arrivals (see [Beam search](<../Engine/Beam Search>)).
+- The AI can evaluate several boards at once instead of one at a time.
+- The AI can prepare state at the start of a search and at the root of a decision.

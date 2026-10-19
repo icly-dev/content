@@ -16,6 +16,7 @@ Shared engine vocabulary (board, roof, placement, evaluation, depth, horizon, ho
 | Search width | The beam size the iteration budget translates into; the first layer's cap and the deeper layers' budget scale from it. |
 | Frontier | The set of survivors at the depth currently being expanded. |
 | Candidate | One placement along one path: the board it produces, its status, and a link back to the first placement of its path. |
+| Duplicate arrival | Two candidates in one layer that describe the same state: the same board and roof, the same piece in hold, the same position in the pending queue, and the same state the AI carries. |
 | Iterative widening | Gradually growing the beam, starting narrow and widening while budget remains. The upstream engine that haipa is based on uses this approach. |
 | Branching factor | How many children an average kept position produces, counted as the placements scored from it. |
 | Tie-break | The rule that decides between equally good candidates. Here it is generation order, which makes the whole search deterministic. |
@@ -47,20 +48,20 @@ def search(board, horizon, limits):
     return best.first_move
 ```
 
-Each surviving candidate stores the *first* placement in its path, including whether it used a hold swap. No matter how deep the search goes, it can therefore return one concrete move for the current piece.
+Each surviving candidate stores the *first* placement in its path, including whether it used a hold swap. No matter how deep the search goes, it can therefore return one concrete move for the current piece. The sketch leaves out the duplicate-collapsing step described further down, which decides which arrivals get to compete for a slot.
 
-The search scores each child as soon as it is generated. The [transposition table](<Transposition Table>) caches the board evaluation, while the context-dependent part of the status is applied separately to each candidate.
+The search scores children in the order it generates them. The [transposition table](<Transposition Table>) caches the evaluation, while the context-dependent part of the status is applied separately to each candidate.
 
 ## The beam limit schedule
 
 The schedule is the heart of the design. Given the iteration budget *n* and the horizon, it decides how many survivors each depth may keep. Two ingredients shape it:
 
-1. **A total budget.** The first layer is capped at twice the search width, which is determined by the iteration budget. The remaining budget for deeper layers scales with the same width times the horizon. The first layer is kept outside the profile intentionally: it contains every legal placement of the current piece, about 34 in the shipped ruleset. These placements are cheap to evaluate and directly relevant because one will be played. The cap is high enough that it never binds, so no legal first move is discarded before evaluation. The Gaussian profile only distributes the much larger remaining budget across deeper layers.
-2. **A Gaussian depth profile.** The budget is not divided evenly. A Gaussian distributes it across depths, centered at a configurable fraction of the horizon and using a configurable spread. Each depth gets at least 5 percent of the peak. Depths near the center keep most survivors, while both ends get less. Early depths need less budget because they are cheap to revisit and their board evaluations remain in the transposition table. The final depths also get less because there is little opportunity to use their results.
+1. **A total budget.** The first layer is capped at twice the search width, which is determined by the iteration budget. The remaining budget for deeper layers scales with the same width times the horizon. The first layer is kept outside the profile intentionally: it contains every legal placement of the current piece, a few dozen on an open board. These placements are cheap to evaluate and directly relevant because one will be played. The cap sits far above that number, so at a normal budget no legal first move is dropped before evaluation. If a crowded position ever offers more, every first placement is still scored and can still be the move that gets played; the cap only decides how many of them the search carries deeper. The Gaussian profile only distributes the much larger remaining budget across deeper layers.
+2. **A Gaussian depth profile.** The budget is not divided evenly. A Gaussian distributes it across depths, centered at a configurable fraction of the horizon and using a configurable spread. Each depth gets at least 5 percent of the peak. Depths near the center keep most survivors, while both ends get less. Early depths need less budget because they are cheap to revisit and their evaluations remain in the transposition table. The final depths also get less because there is little opportunity to use their results.
 
 The AI's configuration sets the two profile controls, peak position and spread. Changing the configuration changes where the search concentrates its work.
 
-The animations below move the peak across the full horizon. They use a horizon of 7 and an iteration budget of 200. Solid bars show the candidates that exist and enter the beam; outlines show the caps. The blue bar is the fixed first-layer cap. At this budget it is higher than the roughly 34 possible first placements, so it never binds. With a narrow spread, the peak covers one or two depths. With a wider spread, survivors cover most of the horizon:
+The animations below move the peak across the full horizon. They use a horizon of 7 and an iteration budget of 200. Solid bars show the candidates that exist and enter the beam; outlines show the caps. The blue bar is the fixed first-layer cap. At this budget it is higher than the number of legal first placements, so it does not bind. With a narrow spread, the peak covers one or two depths. With a wider spread, survivors cover most of the horizon:
 
 ![Beam limits with spread 0.5 while the peak sweeps across the horizon](../../asset/beam_limits_spread_0.5.gif)
 
@@ -85,6 +86,14 @@ Candidates are ranked by status. Ties go to the candidate generated earlier. Tog
 
 Beam search can make a mistake when it discards a candidate. A placement pruned at depth 2 is never reconsidered, even if it would have led to a better result. The schedule aims to make that loss unlikely where it matters.
 
+## Collapsing duplicate arrivals
+
+Two paths can arrive at the same state in the same layer: the same board and roof, the same piece in hold, the same position in the pending queue, and the same state the AI carries along its path. Left alone, both would compete for beam space and crowd out positions that actually differ.
+
+Before an arrival competes for a slot, the search collapses it with any earlier arrival in that layer that describes the same state, keeping the better-scoring one. The AI supplies the fingerprint of the state it carries, because only the AI knows what it accumulates along a path; an AI that cannot summarize that state simply skips the step.
+
+The step costs one fingerprint lookup per arrival and one fixed-size table, reused for every layer. In exchange the beam holds distinct positions instead of several copies of the same one, which is what the budget is meant to buy. The deepest layer skips the step, since nothing is expanded from it.
+
 ## Memory
 
 The schedule also puts a hard limit on search memory. A layer never holds more candidates than its beam limit, so the total number of live candidates cannot exceed the sum of the caps across the horizon. Each candidate stores its resulting board, status, remaining pieces, and a link to the first placement in its path. The search does not keep a tree. It drops pruned candidates immediately, and they can return only through another path.
@@ -95,7 +104,7 @@ The figure shows what this means across the tree. The first layer supplies the p
 
 Each layer reuses the previous layer's storage, so memory use levels off after the initial layers instead of growing with the tree.
 
-Most memory is used outside this loop by the per-depth transposition tables, described in [Transposition table](<Transposition Table>), and the between-decision state listed in [Overview](<Overview>). The engine reports total memory use, including the tables.
+Most memory is used outside this loop by the per-depth transposition tables, described in [Transposition table](<Transposition Table>), and the between-decision state listed in [Overview](<Overview>). The duplicate-collapsing step adds one fixed-size table of fingerprints, and the search drops each arrival that loses to an earlier copy of its state. The engine reports total memory use, including the tables.
 
 ## Stopping early
 

@@ -24,4 +24,4 @@ The minimum anticorrelated with the hand eval: boards along the teacher's line a
 
 ## The verdict
 
-**Refuted.** Statistics along a line still re-import horizon-dependent structure in a softer form. The terminal value of the line is a different quantity, bounded and without the dive incentive; it is under test in [Blending](<Blending>).
+**Refuted.** Statistics along a line still re-import horizon-dependent structure in a softer form. The terminal value of the line is a different quantity, bounded and without the dive incentive; [Blending](<Blending>) tested it and refuted it too.

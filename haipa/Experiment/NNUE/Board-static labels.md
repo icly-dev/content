@@ -6,7 +6,7 @@ title: Board-static labels
 
 **Status: adopted**
 
-The label is the hand eval of the collected board itself: no teacher replay at label time, no lookahead. This is the base recipe of the current loop.
+The label is the hand eval of the collected board itself: no teacher replay at label time, no lookahead. This became the base recipe for every arm that followed.
 
 Shared vocabulary in [Glossary](<../../Engine/Glossary>). This page adds:
 
