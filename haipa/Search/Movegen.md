@@ -17,6 +17,7 @@ Shared engine vocabulary (board, roof, placement, depth, horizon, hold) is defin
 | Term | Meaning |
 |------|---------|
 | Spawn | The position where a newly entering piece appears. The AI's answer determines it (see [AI interface](<../AI/AI interface>)). |
+| Start | Where the piece begins the move being planned: its spawn, or, in a live decision, the spot the runner reports it at. |
 | Landing | A spot where the piece can come to rest: a position and orientation, before any lines clear. A [placement](<../Engine/Glossary>) is a landing plus the clears it causes. |
 | Resting | A property of a landing: the piece cannot move further down from that spot. |
 | Tag | An additional value the search attaches to every landing. Its meaning belongs to the search layer, not the movement mechanics. In the shipped search, it records the T-spin grade. |
@@ -61,8 +62,22 @@ A placement can be reported more than once. Different kick sequences may reach t
 
 ## What it costs and where it runs
 
-Movegen runs for every candidate expanded by the beam, once for each piece choice: the current piece and, when holding is allowed, the held piece. A piece with no free entry spot is skipped instead of searched; when the current piece is the one skipped, the hold branch still runs.
+Movegen runs for every candidate expanded by the beam, once for each piece choice: the current piece and, when holding is allowed, the held piece. A piece with no free entry spot is skipped instead of searched; when the current piece is the one skipped, the hold branch still runs. When the two choices are the same piece, the duplication between them is cut.
+
+## When both choices are the same piece
+
+Both searches would report the same landings, so what differs between them is only the start, and that decides how much of the duplication the engine removes:
+
+| The two starts | What is searched |
+|---|---|
+| The same spot | Only the current piece. A swap would put the piece back on the spot it already occupies. |
+| The same height, a different spot | Both, then the hold branch keeps only landings the current piece cannot reach on its own. A swap that changes nothing is not worth an input. |
+| Different heights | Only the higher start. When that start belongs to the held copy, the move comes back as a swap. |
+
+The higher start can fall to the lower one and then follow the same inputs, so it reaches every landing the lower start does; searching the lower one would pay twice for a subset of the same answer.
+
+The starts differ only at the root of a live decision. A runner reports the piece where it actually is, and by the time the engine answers it often sits several rows below its spawn while the held copy waits at the spawn. Inside the search the two choices enter at the same spot, since the entry spot is the AI's answer and the shipped AIs return the same one however the piece enters.
 
 ## What the beam search does with landings
 
-Landings connect the movement and search layers. Each candidate starts from a landing and keeps only the first landing in its path, which lets a deep search return one concrete move. If the held piece is the same as the current piece, the hold branch keeps only landings the current piece cannot reach on its own. A hold swap that changes nothing is not worth an input.
+Landings connect the movement and search layers. Each candidate starts from a landing and keeps only the first landing in its path, which lets a deep search return one concrete move.
