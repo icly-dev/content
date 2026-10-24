@@ -51,13 +51,16 @@ The report also shows a seat-adjusted figure, which subtracts the seat mean from
 
 ## Why battles are never mirrored
 
-Some game tools mirror a match by swapping sides, playing twice, and combining the results in the hope that luck will cancel out. This tool does not, for three reasons:
+Mirroring a battle means replaying it with the seats exchanged on the same seed pair and folding the two scores together, on the assumption that the pair cancels luck. This tool never does it, but the reason is not bias.
 
-- **Luck does not cancel:** Piece sequences behave like noise, but swapping seeds does not reverse them. A lucky theta can win both games, counting one false signal twice.
-- **Combining games weakens the signal:** Folding two games into one result can turn a real advantage into a tie if the weaker side steals a game through luck.
-- **It costs twice as much for the same information.**
+The battle simulation is exactly seat-symmetric: both players start from the same position, each draws its pieces from its own seed, and garbage is exchanged only after both have moved. Swapping the seats and the seeds together replays the same two trajectories with the labels switched, so the two scores always add up to one. A [measured check](<../Experiment/Mirrored seed pairs>) found this exact complement in every one of 200 pairs, and no difference from an independent batch beyond the noise of the two readings.
 
-Chess can use mirrored matches because the armies are identical and only the turn order changes. Tetris battles are simultaneous, and each player sees a different piece queue. Swapping seeds cannot cancel that difference; only averaging across many independent seed pairs can.
+Two consequences follow:
+
+- **Folding pairs cancels the difference, not the luck.** Every mirrored pair averages exactly one half whatever the thetas, so a mirrored batch says nothing about which is stronger.
+- **The second battle is a duplicate.** One battle per pair is usable, half of an independent batch, and the mirrored reading's standard error was 1.33 times the independent one in the same check.
+
+Chess can mirror because the armies are identical and only turn order changes, so the second game is a genuine, differently played game. In a Tetris battle the seats have no differing rules: exchanging the seeds hands each player the other player's piece stream rather than re-rolling it. Only averaging over many independent seed pairs reduces the noise.
 
 ## How many games
 
