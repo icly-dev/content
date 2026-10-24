@@ -49,6 +49,22 @@ The two readings differ by -0.0350 with a standard error of 0.0293, z = -1.19. M
 
 The mirrored reading was also less precise: its standard error was 1.33 times the independent reading's, close to the 1.41 that halving the usable battles predicts. Matching the independent precision would take about 1.77 times the battles.
 
+## What 200 pairs do and do not prove
+
+The natural objection is that 200 pairs make both readings so precise that their agreement hides any real difference, and that mirroring might pay at the battle counts tuning actually uses, where tens of games stand in for hundreds. That reads the result backwards: the redundancy is a per-pair identity, not a statistical trend.
+
+- **The complement applies pair by pair, not to the batch.** Every pair's two scores add to one, so every pair averages one half at ten pairs or at ten thousand. Pooling never says which theta is stronger.
+- **One game per pair is the whole sample.** Keeping only the first-seat battles leaves the same estimator as playing those battles alone, so a mirrored pair spends two battles to obtain one. At any battle count, independent seed pairs turn the same budget into twice as many usable results.
+
+The batch size only buys precision, and the ratio is fixed. This is why the mirrored reading came out 1.33 times less precise, close to the 1.41 that one usable game per two battles predicts:
+
+| Same 400-battle budget | Usable battles | Standard error, relative |
+|---|---|---|
+| Independent pairs (200) | 400 battles | 1.00 |
+| Mirrored pairs (200) | 200 battles | 1.41 |
+
+Only the bias reading is statistical, and there a bigger batch works the other way: more battles make a bias easier to see, not easier to hide. The difference of -0.0350 with a standard error of 0.0293 does not prove zero bias, it bounds any bias at a few points. That bound matters less than the count suggests, because the claim under test, that a lucky theta can win both battles of a pair, cannot happen at any count: in this run the production theta's 25 first-seat wins reappeared as 25 swapped losses, one for one.
+
 ## Why the mirror is not a second battle
 
 The battle simulation is exactly seat-symmetric. Both players start from the same position, each one draws its pieces from its own seed, and garbage is exchanged only after both have moved; no rule treats the seats differently. Exchanging the seats and the seeds together therefore replays the same two trajectories with the labels switched: the board the production theta built is rebuilt by the candidate, and the attacks it received are the attacks it now sends. The scores add up to one by construction.
