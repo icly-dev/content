@@ -9,20 +9,24 @@ Tuning improves the AI's judgment by adjusting the theta, a list of numbers. Eac
 The loop has four parts, each with its own page:
 
 ```text
-theta candidates -> battles -> Elo ranking -> search step -> better candidates
+theta candidates -> tournament and anchors -> scores -> search step -> better candidates
 ```
 
 - [Match API](<Match API>) defines the battle two thetas play, the seeds that pin it, and how a result becomes a score.
-- [Matchmaking](<Matchmaking>) ranks one generation's candidates with an Elo tournament.
-- [CMA-ES](<CMA-ES>) is the black box search that proposes each generation's candidates from those rankings.
+- [Matchmaking](<Matchmaking>) scores one generation's candidates in a round robin, with fixed anchors for a stable reference.
+- [CMA-ES](<CMA-ES>) is the black box search that proposes each generation's candidates from those scores.
 - [Theta comparison](<Theta comparison>) settles whether a candidate really beats another before anyone adopts it.
+
+Battles can also run on other machines through [remote helpers](<Remote helpers>), which changes nothing about the loop.
 
 ## Glossary
 
 | Term | Meaning |
 |------|---------|
 | Theta | The list of numbers the AI's judgment is built on. Each AI has its own theta, and tuning searches one at a time. |
-| Generation | One round of the loop: sample candidates, battle, rank, update the search. |
+| Generation | One round of the loop: sample candidates, battle, score, update the search. |
+| Candidate | One theta sampled by the search for a generation. |
+| Anchor | A fixed theta outside the generation that every candidate plays, so scores stay comparable across generations. |
 | Black box | A search that sees only outcomes. Battles return wins, ties and losses, never the inside of the evaluation. |
 
 ## Why battles decide
