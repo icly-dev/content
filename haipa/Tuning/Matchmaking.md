@@ -24,6 +24,8 @@ Anchors fix the reference point. They are fixed thetas that stand outside the ge
 
 Anchors also cut noise, through common random numbers. For a given anchor and repeat, the seed pair comes from the run seed and is identical for every candidate and every generation. Every candidate faces the same anchor, in the same seat, on the same deal, so a difference in the result comes from the candidate.
 
+A [measured check](<../Experiment/Anchored versus unanchored tuning>) ran the tournament with and without the anchor: the anchor changed which direction the search took, but not how strong the result played.
+
 ## The field
 
 A generation has 16 candidates by default, the population the search samples, plus the anchors. Only the candidates are scored for the search; the anchors are opponents and never play one another. Extra anchors are kept few, because each one adds battles to every candidate's generation: at the defaults, one anchor and an appearance quota of 64, a candidate plays 64 candidate battles plus 8 anchor battles.
