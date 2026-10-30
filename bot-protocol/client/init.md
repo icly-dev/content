@@ -15,7 +15,7 @@ Messages are one JSON object per line. See [transport](<transport>) for framing,
 | Term | Meaning |
 |------|---------|
 | Platform | A named ruleset the bot supports, such as `ppt`. |
-| Profile | The values that come with a platform, such as its rotation system. |
+| Profile | The values that come with a platform, such as its rotation system and piece shapes. |
 | Round | One game, from the first piece to the end. |
 | Rotation system | The named set of piece rotations and kicks. |
 | Lockout | A piece that locks with every cell above the visible board. |
@@ -54,7 +54,7 @@ A piece is locked out when all of its cells are above the visible board. A piece
 
 The board is not a rule. Its width, height, and rows are sent with every move request. This matters for modes that join boards during a round, where the width can grow.
 
-The current piece, queue, and attack multiplier are also live values. They belong to the move request. Platform-specific live values, such as gravity or incoming garbage, belong to the platform page.
+The current piece, hold, queue, and attack multiplier are also live values. They belong to the move request. Platform-specific live values, such as gravity or incoming garbage, belong to the platform page.
 
 ## Reply
 
