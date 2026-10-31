@@ -91,9 +91,9 @@ Sharing a seed pair per round does not add battles. It fixes which pieces and wh
 
 The lever that does shrink the noise is the battle count. At 28 battles the standard error is 0.09; at 112 it is 0.05, and candidate differences would begin to separate. The [anchored tuning experiment](<Anchored versus unanchored tuning>) reached the same conclusion for a different knob: changing the anchor redirects the path but does not raise the endpoint, and sharpening a verdict is a matter of more battles.
 
-## A reporting quirk found along the way
+## A reporting bug found and fixed
 
-While chasing why unrelated generations printed the same anchor score, the experiment found that the reported fitness divides by too large a count. The anchor battles already appear in the battle schedule, and the appearances tally adds them a second time, so a candidate with 28 candidate battles and 8 anchor battles is divided by 44 instead of 36. Every candidate is scaled by the same 36/44, and the search only consumes the order of the scores, so the ranking, the selection, and every comparison in this experiment are unaffected. Only the absolute printed level is about 18 percent below the true mean score over its 36 battles, so it should not be read as a battle score. Fixing it would change the printed number, not the tuning.
+While chasing why unrelated generations printed the same anchor score, the experiment found that the reported fitness divided by too large a count. The anchor battles already appear in the battle schedule, and the appearances tally added them a second time, so a candidate with 28 candidate battles and 8 anchor battles was divided by 44 instead of 36. Every candidate in the experiment was scaled by the same 36/44, and the search only consumes the order of the scores, so the ranking, the selection, and every comparison on this page were unaffected. Only the absolute printed level was about 18 percent below the true mean score over its 36 battles, so it did not read as a battle score. The tally was corrected after the experiment: each candidate is now divided by the battles it actually played, so the printed level is the mean it claims to be. A field with an equal number of battles per candidate, like this one, keeps its ranking; an odd field, where byes make the counts differ, could reorder.
 
 ## Conclusion
 
@@ -103,4 +103,4 @@ So the tournament keeps independent seed pairs per battle, and the balanced sche
 
 ## What changed
 
-Nothing in the tournament. No schedule was adopted or removed, and no tuning setting followed from the result. The shipped defaults already give each battle its own seed pair, and nothing here argues for changing that. The balanced schedule remains available for its fairer within-round comparisons, not as a strength lever. The reported-fitness quirk is noted above; fixing it would change a printed level, not any tuning result.
+Nothing in the tournament's design. No schedule was adopted or removed, and no tuning setting followed from the result. The shipped defaults already give each battle its own seed pair, and nothing here argues for changing that. The balanced schedule remains available for its fairer within-round comparisons, not as a strength lever. The reporting bug described above was fixed afterwards: the printed level now equals the mean battle score, and the ranking in an even field like this one is unchanged.
